@@ -190,48 +190,17 @@ jobs:
           echo "Creating RC version: $RC_VERSION"
           npm version "$RC_VERSION" --no-git-tag-version
 
-      - name: Debug OIDC and Repository Info
-        run: |
-          echo "=== Repository Information ==="
-          echo "GitHub Repository: ${{ github.repository }}"
-          echo "GitHub Repository Owner: ${{ github.repository_owner }}"
-          echo "GitHub Workflow: ${{ github.workflow }}"
-          echo "GitHub Workflow File: .github/workflows/publish.yml"
-          echo "GitHub Job: ${{ github.job }}"
-          echo "GitHub Run ID: ${{ github.run_id }}"
-          echo "GitHub Actor: ${{ github.actor }}"
-          echo ""
-          echo "=== OIDC Token Information ==="
-          echo "Actions ID Token Request Url: $ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "OIDC Available: $(if [ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then echo 'YES'; else echo 'NO'; fi)"
-          echo ""
-          echo "=== NPM Configuration ==="
-          npm config get registry
-          echo "NPM version: $(npm --version)"
-          echo "Required for trusted publishing: 11.5.1+"
-          echo ""
-          echo "=== Test OIDC Authentication ==="
-          echo "Attempting npm whoami to test authentication..."
-          npm whoami 2>&1 || echo "npm whoami failed - this is expected with OIDC-only auth"
-
       - name: Publish to NPM
         if: steps.publish-strategy.outputs.should_publish == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           PUBLISH_TAG="${{ steps.publish-strategy.outputs.publish_tag }}"
 
-          echo "Attempting OIDC publish first..."
           if [ "$PUBLISH_TAG" = "latest" ]; then
-            npm publish --access public 2>/dev/null || {
-              echo "OIDC publish failed, falling back to token authentication..."
-              [ -n "$NODE_AUTH_TOKEN" ] && npm publish --access public --provenance
-            }
+            echo "Publishing as latest version..."
+            npm publish --access public
           elif [ "$PUBLISH_TAG" = "rc" ]; then
-            npm publish --tag rc --access public 2>/dev/null || {
-              echo "OIDC publish failed, falling back to token authentication..."
-              [ -n "$NODE_AUTH_TOKEN" ] && npm publish --tag rc --access public --provenance
-            }
+            echo "Publishing as RC version..."
+            npm publish --tag rc --access public
           fi
 
       - name: Extract Changelog
