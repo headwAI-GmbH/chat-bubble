@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.0.2] - 2026-01-05
+
+### Changed
+
+- To trusted publisher configuration to publish npm package
+
+## [8.0.1] - 2026-01-05
+
+## Added
+
+- Compatability with Open WebUI
+- Open source relevant files
+
 ## [7.5.0] - 2025-11-26
 
 ### Changed
