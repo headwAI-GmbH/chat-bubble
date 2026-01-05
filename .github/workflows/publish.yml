@@ -188,6 +188,17 @@ jobs:
           echo "Creating RC version: $RC_VERSION"
           npm version "$RC_VERSION" --no-git-tag-version
 
+      - name: Debug NPM configuration
+        run: |
+          echo "Checking NPM registry configuration..."
+          npm config get registry
+          echo "Checking for .npmrc..."
+          cat ~/.npmrc 2>/dev/null || echo "No ~/.npmrc file found"
+          echo "NPM version:"
+          npm --version
+          echo "Node version:"
+          node --version
+
       - name: Publish to NPM
         if: steps.publish-strategy.outputs.should_publish == 'true'
         run: |
