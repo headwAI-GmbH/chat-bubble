@@ -187,40 +187,17 @@ jobs:
           echo "Creating RC version: $RC_VERSION"
           npm version "$RC_VERSION" --no-git-tag-version
 
-      - name: Debug NPM configuration
-        run: |
-          echo "Checking NPM registry configuration..."
-          npm config get registry
-          echo "Checking for .npmrc..."
-          cat ~/.npmrc 2>/dev/null || echo "No ~/.npmrc file found"
-          echo "NPM version:"
-          npm --version
-          echo "Node version:"
-          node --version
-          echo "Environment variables:"
-          env | grep -E "(NPM|NODE|ACTIONS)" | sort
-
-      - name: Configure NPM for trusted publishing
-        run: |
-          echo "Setting up NPM for trusted publishing..."
-          npm config set //registry.npmjs.org/:_authToken=""
-          npm config set registry https://registry.npmjs.org/
-          echo "NPM config after setup:"
-          npm config list
-
       - name: Publish to NPM
         if: steps.publish-strategy.outputs.should_publish == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           PUBLISH_TAG="${{ steps.publish-strategy.outputs.publish_tag }}"
 
           if [ "$PUBLISH_TAG" = "latest" ]; then
             echo "Publishing as latest version..."
-            npm publish --access public --provenance
+            npm publish --access public
           elif [ "$PUBLISH_TAG" = "rc" ]; then
             echo "Publishing as RC version..."
-            npm publish --tag rc --access public --provenance
+            npm publish --tag rc --access public
           fi
 
       - name: Extract Changelog
