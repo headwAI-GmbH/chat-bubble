@@ -193,21 +193,22 @@ jobs:
           echo "GitHub Repository: ${{ github.repository }}"
           echo "GitHub Repository Owner: ${{ github.repository_owner }}"
           echo "GitHub Workflow: ${{ github.workflow }}"
+          echo "GitHub Workflow File: .github/workflows/publish.yml"
           echo "GitHub Job: ${{ github.job }}"
           echo "GitHub Run ID: ${{ github.run_id }}"
           echo "GitHub Actor: ${{ github.actor }}"
           echo ""
           echo "=== OIDC Token Information ==="
-          echo "GitHub Token: ${GITHUB_TOKEN:0:20}..." 
-          echo "Actions ID Token Request Token: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:20}..."
           echo "Actions ID Token Request Url: $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "OIDC Available: $(if [ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then echo 'YES'; else echo 'NO'; fi)"
           echo ""
           echo "=== NPM Configuration ==="
           npm config get registry
           npm --version
           echo ""
-          echo "=== Package Information ==="
-          cat package.json | grep -E '"name"|"repository"' || true
+          echo "=== Test OIDC Authentication ==="
+          echo "Attempting npm whoami to test authentication..."
+          npm whoami 2>&1 || echo "npm whoami failed - this is expected with OIDC-only auth"
 
       - name: Publish to NPM
         if: steps.publish-strategy.outputs.should_publish == 'true'
