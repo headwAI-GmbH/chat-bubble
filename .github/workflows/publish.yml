@@ -187,6 +187,28 @@ jobs:
           echo "Creating RC version: $RC_VERSION"
           npm version "$RC_VERSION" --no-git-tag-version
 
+      - name: Debug OIDC and Repository Info
+        run: |
+          echo "=== Repository Information ==="
+          echo "GitHub Repository: ${{ github.repository }}"
+          echo "GitHub Repository Owner: ${{ github.repository_owner }}"
+          echo "GitHub Workflow: ${{ github.workflow }}"
+          echo "GitHub Job: ${{ github.job }}"
+          echo "GitHub Run ID: ${{ github.run_id }}"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo ""
+          echo "=== OIDC Token Information ==="
+          echo "GitHub Token: ${GITHUB_TOKEN:0:20}..." 
+          echo "Actions ID Token Request Token: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:20}..."
+          echo "Actions ID Token Request Url: $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo ""
+          echo "=== NPM Configuration ==="
+          npm config get registry
+          npm --version
+          echo ""
+          echo "=== Package Information ==="
+          cat package.json | grep -E '"name"|"repository"' || true
+
       - name: Publish to NPM
         if: steps.publish-strategy.outputs.should_publish == 'true'
         run: |
