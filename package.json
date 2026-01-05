@@ -1,0 +1,48 @@
+{
+  "name": "@headwai/chat-bubble",
+  "version": "8.0.1",
+  "description": "A chat bubble to interact with a HeadwAI ONE or an Open WebUI instance",
+  "type": "module",
+  "files": [
+    "dist-widget",
+    "docs",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "chat",
+    "ai",
+    "svelte",
+    "deep-chat",
+    "widget",
+    "bubble"
+  ],
+  "author": "headwAI GmbH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/headwAI-GmbH/chat-bubble.git"
+  },
+  "homepage": "https://github.com/headwAI-GmbH/chat-bubble#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "npm run build:widget && npm run copy:assets",
+    "build:widget": "vite build",
+    "copy:assets": "cp -r icons dist-widget/",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.1",
+    "deep-chat": "2.3.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-svelte": "^3.4.0",
+    "svelte": "^4.2.9",
+    "vite": "^5.0.12"
+  },
+  "dependencies": {
+    "deep-chat": "2.3.0"
+  }
+}

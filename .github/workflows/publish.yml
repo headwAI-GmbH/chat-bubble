@@ -1,0 +1,291 @@
+name: Build and Publish to NPM
+
+on:
+  # Automatic trigger on push to main
+  push:
+    branches: [main]
+
+  # Manual trigger on any branch
+  workflow_dispatch:
+    inputs:
+      publish_rc:
+        description: 'Publish as RC version'
+        required: false
+        default: true
+        type: boolean
+
+# Grant necessary permissions to the GITHUB_TOKEN
+permissions:
+  contents: write # Needed to push tags
+  pull-requests: read
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    outputs:
+      version-bumped: ${{ steps.version-validation.outputs.version-bumped }}
+      current-version: ${{ steps.package-info.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history to compare with main branch
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Get package info
+        id: package-info
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version exists on NPM
+        id: version-check
+        run: |
+          PACKAGE_NAME="${{ steps.package-info.outputs.name }}"
+          PACKAGE_VERSION="${{ steps.package-info.outputs.version }}"
+
+          # Check if the version exists on NPM
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on NPM"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION does not exist on NPM"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate version bump
+        id: version-validation
+        run: |
+          CURRENT_VERSION="${{ steps.package-info.outputs.version }}"
+          VERSION_EXISTS="${{ steps.version-check.outputs.exists }}"
+          IS_MAIN_BRANCH="${{ github.ref == 'refs/heads/main' }}"
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "Version exists on NPM: $VERSION_EXISTS"
+          echo "Is main branch: $IS_MAIN_BRANCH"
+
+          # For pull requests or branches that will be merged to main, require version bump
+          if [ "$VERSION_EXISTS" = "true" ] && [ "$IS_MAIN_BRANCH" = "false" ]; then
+            echo "❌ Version $CURRENT_VERSION already exists on NPM"
+            echo "version-bumped=false" >> $GITHUB_OUTPUT
+            echo ""
+            echo "To fix this, bump the version using one of:"
+            echo "  npm version patch   # for bug fixes"
+            echo "  npm version minor   # for new features"  
+            echo "  npm version major   # for breaking changes"
+            exit 1
+          elif [ "$VERSION_EXISTS" = "false" ]; then
+            echo "✅ Version $CURRENT_VERSION is new and can be published"
+            echo "version-bumped=true" >> $GITHUB_OUTPUT
+          else
+            # On main branch, we allow existing versions (they just won't be republished)
+            echo "ℹ️  On main branch - allowing existing version"
+            echo "version-bumped=true" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-publish:
+    runs-on: ubuntu-latest
+    needs: version-check
+
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure NPM authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Get package info
+        id: package-info
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version exists on NPM
+        id: version-check
+        run: |
+          PACKAGE_NAME="${{ steps.package-info.outputs.name }}"
+          PACKAGE_VERSION="${{ steps.package-info.outputs.version }}"
+
+          # Check if the version exists on NPM
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on NPM"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION does not exist on NPM"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine publish strategy
+        id: publish-strategy
+        run: |
+          IS_MAIN_BRANCH="${{ github.ref == 'refs/heads/main' }}"
+          IS_MANUAL="${{ github.event_name == 'workflow_dispatch' }}"
+          VERSION_EXISTS="${{ steps.version-check.outputs.exists }}"
+          VERSION_BUMPED="${{ needs.version-check.outputs.version-bumped }}"
+
+          echo "is_main_branch=$IS_MAIN_BRANCH" >> $GITHUB_OUTPUT
+          echo "is_manual=$IS_MANUAL" >> $GITHUB_OUTPUT
+          echo "version_exists=$VERSION_EXISTS" >> $GITHUB_OUTPUT
+
+          # Only publish if version check passed
+          if [ "$VERSION_BUMPED" = "false" ]; then
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "publish_tag=none" >> $GITHUB_OUTPUT
+            echo "reason=Version validation failed" >> $GITHUB_OUTPUT
+          elif [ "$VERSION_EXISTS" = "true" ]; then
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "publish_tag=none" >> $GITHUB_OUTPUT
+            echo "reason=Version already exists" >> $GITHUB_OUTPUT
+          elif [ "$IS_MAIN_BRANCH" = "true" ] && [ "$IS_MANUAL" = "false" ]; then
+            # Automatic push to main - publish as latest
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "publish_tag=latest" >> $GITHUB_OUTPUT
+            echo "reason=Automatic publish to main branch" >> $GITHUB_OUTPUT
+          elif [ "$IS_MANUAL" = "true" ]; then
+            # Manual trigger - publish as RC
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "publish_tag=rc" >> $GITHUB_OUTPUT
+            echo "reason=Manual publish as RC version" >> $GITHUB_OUTPUT
+          else
+            # Other cases - don't publish
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "publish_tag=none" >> $GITHUB_OUTPUT
+            echo "reason=Not main branch and not manual trigger" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Modify version for RC
+        if: steps.publish-strategy.outputs.should_publish == 'true' && steps.publish-strategy.outputs.publish_tag == 'rc'
+        run: |
+          CURRENT_VERSION="${{ steps.package-info.outputs.version }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+          COMMIT_SHA="${{ github.sha }}"
+
+          # Create RC version: version-rc.branchname.shortsha
+          SHORT_SHA=${COMMIT_SHA:0:7}
+          SAFE_BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9.-]/-/g')
+          RC_VERSION="${CURRENT_VERSION}-rc.${SAFE_BRANCH_NAME}.${SHORT_SHA}"
+
+          echo "Creating RC version: $RC_VERSION"
+          npm version "$RC_VERSION" --no-git-tag-version
+
+      - name: Debug NPM authentication
+        run: |
+          echo "Checking NPM authentication..."
+          npm whoami
+          echo "Checking package maintainers..."
+          npm info @headwai/chat-bubble
+
+      - name: Publish to NPM
+        if: steps.publish-strategy.outputs.should_publish == 'true'
+        run: |
+          PUBLISH_TAG="${{ steps.publish-strategy.outputs.publish_tag }}"
+
+          if [ "$PUBLISH_TAG" = "latest" ]; then
+            echo "Publishing as latest version..."
+            npm publish --access public
+          elif [ "$PUBLISH_TAG" = "rc" ]; then
+            echo "Publishing as RC version..."
+            npm publish --tag rc --access public
+          fi
+
+      - name: Extract Changelog
+        if: steps.publish-strategy.outputs.should_publish == 'true' && steps.publish-strategy.outputs.publish_tag == 'latest'
+        id: extract-changelog
+        run: |
+          VERSION="${{ steps.package-info.outputs.version }}"
+          # Escape dots in version for regex matching
+          ESCAPED_VERSION=$(echo "$VERSION" | sed 's/\./\\./g')
+          # Extract the section for this version from CHANGELOG.md
+          # Finds the line starting with "## [VERSION]" and prints until the next "## " line
+          awk "/^## \[${ESCAPED_VERSION}\]/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md > RELEASE_NOTES.md
+          
+          # Check if RELEASE_NOTES.md is empty
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "No changelog entry found for version $VERSION"
+            echo "No specific notes found in CHANGELOG.md." > RELEASE_NOTES.md
+          fi
+          
+          echo "Extracted release notes:"
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        if: steps.publish-strategy.outputs.should_publish == 'true' && steps.publish-strategy.outputs.publish_tag == 'latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.package-info.outputs.version }}
+          name: v${{ steps.package-info.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: ${{ steps.package-info.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.package-info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version Bumped**: ${{ needs.version-check.outputs.version-bumped }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Should Publish**: ${{ steps.publish-strategy.outputs.should_publish }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Publish Tag**: ${{ steps.publish-strategy.outputs.publish_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Reason**: ${{ steps.publish-strategy.outputs.reason }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.publish-strategy.outputs.should_publish }}" = "true" ]; then
+            echo "✅ **Published successfully!**" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.publish-strategy.outputs.publish_tag }}" = "rc" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "📦 **RC Installation**:" >> $GITHUB_STEP_SUMMARY
+              echo '```bash' >> $GITHUB_STEP_SUMMARY
+              echo "npm install ${{ steps.package-info.outputs.name }}@rc" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            else
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "📦 **Installation**:" >> $GITHUB_STEP_SUMMARY
+              echo '```bash' >> $GITHUB_STEP_SUMMARY
+              echo "npm install ${{ steps.package-info.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ **Not published**" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ needs.version-check.outputs.version-bumped }}" = "false" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "💡 **To fix version bump requirement:**" >> $GITHUB_STEP_SUMMARY
+              echo '```bash' >> $GITHUB_STEP_SUMMARY
+              echo "npm version patch   # for bug fixes" >> $GITHUB_STEP_SUMMARY
+              echo "npm version minor   # for new features" >> $GITHUB_STEP_SUMMARY
+              echo "npm version major   # for breaking changes" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          fi

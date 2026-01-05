@@ -1,0 +1,10 @@
+.env
+dist/
+dist-widget/
+node_modules/
+aws-amplify/*.zip
+
+# Mac
+.DS_Store
+
+.vscode/

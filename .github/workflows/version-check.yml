@@ -1,0 +1,72 @@
+name: Version Bump Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    name: Require Version Bump
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Get package info
+        id: package-info
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "Package: $PACKAGE_NAME"
+          echo "Version: $PACKAGE_VERSION"
+
+      - name: Check if version exists on NPM
+        id: version-exists
+        run: |
+          PACKAGE_NAME="${{ steps.package-info.outputs.name }}"
+          PACKAGE_VERSION="${{ steps.package-info.outputs.version }}"
+
+          echo "Checking if version $PACKAGE_VERSION exists on NPM..."
+
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "❌ Version $PACKAGE_VERSION already exists on NPM"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version $PACKAGE_VERSION is available for publishing"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fail if version already exists
+        if: steps.version-exists.outputs.exists == 'true'
+        run: |
+          echo "::error title=Version Bump Required::Version ${{ steps.package-info.outputs.version }} already exists on NPM"
+          echo ""
+          echo "You must bump the version before merging to main branch."
+          echo "Run one of these commands to bump the version:"
+          echo ""
+          echo "  npm version patch   # Bug fixes (6.4.1 → 6.4.2)"
+          echo "  npm version minor   # New features (6.4.1 → 6.5.0)" 
+          echo "  npm version major   # Breaking changes (6.4.1 → 7.0.0)"
+          echo ""
+          echo "Then commit the changes:"
+          echo "  git add package.json package-lock.json"
+          echo "  git commit -m 'Bump version to X.Y.Z'"
+          echo "  git push"
+          exit 1
+
+      - name: Success message
+        if: steps.version-exists.outputs.exists == 'false'
+        run: |
+          echo "✅ Version check passed!"
+          echo "Version ${{ steps.package-info.outputs.version }} is ready to be published when merged to main."
