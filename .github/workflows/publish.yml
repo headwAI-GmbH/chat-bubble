@@ -36,8 +36,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '20'
 
       - name: Get package info
         id: package-info
@@ -103,8 +102,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci
@@ -188,17 +190,6 @@ jobs:
           echo "Creating RC version: $RC_VERSION"
           npm version "$RC_VERSION" --no-git-tag-version
 
-      - name: Debug NPM configuration
-        run: |
-          echo "Checking NPM registry configuration..."
-          npm config get registry
-          echo "Checking for .npmrc..."
-          cat ~/.npmrc 2>/dev/null || echo "No ~/.npmrc file found"
-          echo "NPM version:"
-          npm --version
-          echo "Node version:"
-          node --version
-
       - name: Publish to NPM
         if: steps.publish-strategy.outputs.should_publish == 'true'
         run: |
@@ -206,10 +197,10 @@ jobs:
 
           if [ "$PUBLISH_TAG" = "latest" ]; then
             echo "Publishing as latest version..."
-            npm publish --access public --provenance
+            npm publish --access public
           elif [ "$PUBLISH_TAG" = "rc" ]; then
             echo "Publishing as RC version..."
-            npm publish --tag rc --access public --provenance
+            npm publish --tag rc --access public
           fi
 
       - name: Extract Changelog
