@@ -360,7 +360,7 @@ Origin: http://localhost:5174
         "{{USER_LANGUAGE}}": "en-GB"
     },
     "chat_id": "3cd6f38c-effc-4038-948a-4fd345ea19b1",
-    "parent_message_id": "2860fdae-4c43-4f59-8217-33dfc92b47d3", // ID of the parent user message
+    "parent_id": "2860fdae-4c43-4f59-8217-33dfc92b47d3", // ID of the parent user message
     "parent_message": { // complete parent user message object
         "id": "2860fdae-4c43-4f59-8217-33dfc92b47d3",
         "role": "user",
