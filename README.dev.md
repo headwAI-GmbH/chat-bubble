@@ -367,7 +367,7 @@ Origin: http://localhost:5174
         "content": "previous user message",
         "timestamp": 1760362655
     },
-    "message_id": "29948ec6-6975-4d3a-b019-ceb8b7f7c698", // ID for the new message assistant message being created
+    "id": "29948ec6-6975-4d3a-b019-ceb8b7f7c698", // ID for the new assistant message being created
     "params": {}, // optional - additional parameters
     "tool_servers": [], // optional - tool server configurations
     "features": { // optional - feature flags
