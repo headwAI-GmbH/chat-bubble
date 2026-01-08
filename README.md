@@ -1,5 +1,7 @@
 # HeadwAI Chat Bubble
 
+**🎮 Try it live:** Experience the HeadwAI Chat Bubble at [chat-bubble.headwai.org](https://chat-bubble.headwai.org/) - configure and test all features in a live environment.
+
 ## Features
 
 - 🚀 Easy integration into any Website

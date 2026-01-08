@@ -2,228 +2,117 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HeadwAI Chat Bubble</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-      }
-      .test-container {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 0;
         background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        max-width: 600px;
-      }
-      .test-button {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 6px;
-        cursor: pointer;
-        margin: 10px 10px 10px 0;
-        font-size: 16px;
-        transition: background-color 0.2s;
-      }
-      .test-button:hover {
-        background: #0056b3;
-      }
-      .test-link {
-        color: #007bff;
-        text-decoration: none;
-        padding: 10px;
-        display: inline-block;
-        border: 2px solid #007bff;
-        border-radius: 4px;
-        margin: 10px 10px 10px 0;
-        transition: all 0.2s;
-      }
-      .test-link:hover {
-        background: #007bff;
-        color: white;
-      }
-      .click-area {
-        background: #f8f9fa;
-        border: 2px dashed #dee2e6;
-        padding: 40px;
-        text-align: center;
-        border-radius: 8px;
-        cursor: pointer;
-        margin: 10px 0;
-        transition: all 0.2s;
-      }
-      .click-area:hover {
-        background: #e9ecef;
-        border-color: #adb5bd;
-      }
-      .counter {
-        font-size: 18px;
-        font-weight: bold;
-        color: #495057;
-      }
-      .bottom-right-area {
-        position: fixed;
-        bottom: 0px;
-        right: 0px;
-        width: 480px;
-        height: 680px;
-        background: rgba(255, 193, 7, 0.3);
-        border: 3px solid #ffc107;
-        border-radius: 12px;
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
-        font-weight: bold;
-        text-align: center;
-        transition: all 0.2s;
-        z-index: 10; /* Lower than chat window (z-index: 999) */
       }
-      .bottom-right-area:hover {
-        background: rgba(255, 193, 7, 0.6);
-        border-color: #ff9f00;
-        transform: scale(1.02);
+      .container {
+        background: white;
+        padding: 60px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        border: 1px solid #e5e7eb;
+      }
+      .logo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 30px;
+      }
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      h1 {
+        color: #333;
+        margin: 0 0 20px;
+        font-size: 32px;
+        font-weight: 600;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 40px;
+        font-size: 18px;
+        line-height: 1.5;
+      }
+      .link {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        margin: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+      .link:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      }
+      .link.secondary {
+        background: #f8f9fa;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+      .link.secondary:hover {
+        background: #667eea;
+        color: white;
       }
     </style>
   </head>
   <body>
-    <div class="test-container">
-      <h1>HeadwAI Chat Bubble Click Test Page</h1>
-      <p>
-        This page tests whether elements are clickable when the HeadwAI Chat
-        Bubble is closed.
-      </p>
-
-      <!-- Info Panel -->
-      <div
-        style="
-          background: #f0f8ff;
-          padding: 15px;
-          border-radius: 8px;
-          margin-bottom: 20px;
-          border: 2px solid #4a90e2;
-        "
-      >
-        <h3 style="margin-top: 0; color: #2c5aa0">� Font Size Detection</h3>
-        <p style="font-size: 14px; color: #666; margin: 0">
-          💡 The HeadwAI Chat Bubble now automatically detects and inherits the
-          font size from its container element at initialization.<br />
-          🔧 All buttons use em-based sizing for consistent relative scaling.<br />
-          ✅ This ensures the widget adapts to different website font sizes
-          automatically.
-        </p>
+    <div class="container">
+      <div class="logo">
+        <img src="/icons/favicon.svg" alt="HeadwAI Logo" />
       </div>
+      <h1>Chat Bubble</h1>
+      <p class="subtitle">Easy-to-integrate AI chat widget for your website</p>
 
-      <h3>Test Buttons:</h3>
-      <button class="test-button" onclick="showAlert('Button 1 clicked!')">
-        Test Button 1
-      </button>
-      <button class="test-button" onclick="showAlert('Button 2 clicked!')">
-        Test Button 2
-      </button>
-      <button class="test-button" onclick="incrementCounter()">
-        Click Counter
-      </button>
-
-      <h3>Test Links:</h3>
-      <a
-        href="#"
-        class="test-link"
-        onclick="showAlert('Link 1 clicked!'); return false;"
-        >Test Link 1</a
-      >
-      <a
-        href="#"
-        class="test-link"
-        onclick="showAlert('Link 2 clicked!'); return false;"
-        >Test Link 2</a
-      >
-
-      <h3>Click Areas:</h3>
-      <div class="click-area" onclick="showAlert('Large area clicked!')">
-        <p>Large Clickable Area - Click anywhere in this box</p>
+      <div>
+        <a href="https://chat-bubble.headwai.org/" class="link" target="_blank">
+          🎮 Try it Live
+        </a>
+        <a
+          href="https://www.headwai.org/contact"
+          class="link secondary"
+          target="_blank"
+        >
+          💬 Contact HeadwAI GmbH
+        </a>
+        <a
+          href="https://github.com/headwAI-GmbH/chat-bubble/issues"
+          class="link secondary"
+          target="_blank"
+        >
+          🛠️ Help Develop
+        </a>
       </div>
-
-      <div class="counter">Click Counter: <span id="counter">0</span></div>
-    </div>
-
-    <div class="test-container">
-      <h3>Instructions:</h3>
-      <ol>
-        <li>
-          <strong>Chat Closed:</strong> You should see a large yellow test area
-          in bottom-right - click anywhere on it
-        </li>
-        <li>
-          <strong>Chat Closed:</strong> Click all buttons and links above - they
-          should all work
-        </li>
-        <li>
-          <strong>Open Chat:</strong> Click the HeadwAI Chat Bubble icon (small
-          circle in bottom-right)
-        </li>
-        <li>
-          <strong>Chat Open:</strong> Yellow area should be partially visible
-          around the edges of the chat window
-        </li>
-        <li>
-          <strong>Chat Open:</strong> Try clicking the visible yellow parts -
-          they should work!
-        </li>
-        <li>
-          <strong>Chat Open:</strong> Try clicking the chat window area - should
-          interact with chat, not yellow area
-        </li>
-        <li>
-          <strong>Close Chat:</strong> Full yellow area should be clickable
-          again
-        </li>
-      </ol>
-      <p><strong>Expected behavior:</strong></p>
-      <ul>
-        <li>✅ Full yellow area clickable when chat closed</li>
-        <li>✅ Yellow area partially overlapped when chat open</li>
-        <li>✅ Visible yellow parts still clickable when chat open</li>
-        <li>✅ Chat window blocks clicks to yellow area behind it</li>
-      </ul>
-    </div>
-
-    <!-- Test area that will be partially overlapped by chat window -->
-    <div
-      class="bottom-right-area"
-      onclick="showAlert('Yellow test area clicked! Check if this works in visible parts when chat is open.')"
-    >
-      🟨 OVERLAP TEST AREA 🟨<br />
-      <small>Larger than chat window</small><br />
-      <small>Click visible parts!</small>
     </div>
 
     <div id="chat-bubble-container"></div>
-
-    <script>
-      let clickCount = 0;
-
-      function showAlert(message) {
-        alert(message);
-        console.log('Click event:', message);
-      }
-
-      function incrementCounter() {
-        clickCount++;
-        document.getElementById('counter').textContent = clickCount;
-        console.log('Counter incremented to:', clickCount);
-      }
-
-      // Log when page is ready
-      console.log('Test page loaded. HeadwAI Chat Bubble should load next.');
-    </script>
-
     <script type="module" src="/src/widget.js"></script>
   </body>
 </html>
