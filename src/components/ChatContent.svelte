@@ -825,14 +825,16 @@
       const timestamp = Math.floor(Date.now() / 1000);
       const models = [assistantId];
 
-      // Create message IDs
-      const userMessageId = generateUUID();
-      const assistantMessageId = generateUUID();
-      
-      // Set current message IDs in stores
-      currentUserMessageId.set(userMessageId);
-      currentAssistantMessageId.set(assistantMessageId);
+      // Use existing message IDs from stores (set earlier in requestInterceptor)
+      const userMessageId = $currentUserMessageId;
+      const assistantMessageId = $currentAssistantMessageId;
 
+      if (!userMessageId || !assistantMessageId) {
+        logger.error(
+          'Missing message IDs in storeChatHistory; expected IDs to be set by requestInterceptor',
+        );
+        return;
+      }
       // Find the previous message to link to
       const previousMessage = $messageHistory[$messageHistory.length - 1];
 
