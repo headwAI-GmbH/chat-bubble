@@ -280,7 +280,6 @@
 
   function transformMessagesFromDeepChatToHeadwai(messages) {
     return messages.map((message) => {
-      console.log('Transforming message from deep-chat to headwAI:', message);
       return {
         role:
           message.role === DEEP_CHAT_ASSISTANT_ROLE
@@ -605,7 +604,7 @@
       logger.log('Creating new chat for first user message');
       await createNewChat();
     }
-    
+
     if (details.body && details.body.messages) {
       // Generate new message IDs for this request if not already set
       if (!$currentUserMessageId) {
@@ -614,18 +613,18 @@
       if (!$currentAssistantMessageId) {
         currentAssistantMessageId.set(generateUUID());
       }
-      
+
       details.body.chat_id = $chatId;
       details.body.id = $currentAssistantMessageId;
       details.body.parent_id = $currentUserMessageId;
-      
+
       // Add parent message to the request body if available
       if ($messageHistory.length > 0) {
         // Get the last non-feedback message from history as the parent for the current user message
         const lastNonFeedbackMessage = [...$messageHistory]
           .reverse()
-          .find(msg => msg.role !== DEEP_CHAT_FEEDBACK_ROLE);
-        
+          .find((msg) => msg.role !== DEEP_CHAT_FEEDBACK_ROLE);
+
         if (lastNonFeedbackMessage) {
           details.body.parent_message = {
             id: lastNonFeedbackMessage.id,
@@ -634,7 +633,7 @@
             role: lastNonFeedbackMessage.role,
             content: lastNonFeedbackMessage.content,
             timestamp: lastNonFeedbackMessage.timestamp,
-            models: lastNonFeedbackMessage.models || [assistantId]
+            models: lastNonFeedbackMessage.models || [assistantId],
           };
         }
       }
