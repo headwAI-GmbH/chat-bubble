@@ -43,9 +43,6 @@ npm run dev
  http://localhost:5174/
 ```
 
-7. Alternatively, build and test deployed version:
-   [Build and Deploy](#build-and-deploy) and open `./test-widget.html` in a browser.
-
 ## Configuration
 
 The HeadwAI Chat Bubble can be configured using environment variables or by changing the attributes of the instance.
@@ -53,6 +50,27 @@ The HeadwAI Chat Bubble can be configured using environment variables or by chan
 ### Environment Variables
 
 Create a `.env` by copying `.env.example` file in your project root with the following variables:
+
+All configuration attributes listed in the [Configuration section of README.md](README.md#configuration) can be overwritten using VITE\_ environment variables. For example:
+
+```bash
+# Production .env file - Core API Configuration
+VITE_CHAT_BUBBLE_API_URL=https://company.headwai-one.at
+VITE_CHAT_BUBBLE_ASSISTANT_ID=customer-support-assistant-id
+
+# Message Configuration
+VITE_CHAT_BUBBLE_MAX_MESSAGES=50
+VITE_CHAT_BUBBLE_INITIAL_MESSAGE=Welcome! How can we help you today?
+VITE_CHAT_BUBBLE_PLACEHOLDER_TEXT=Type your message here...
+
+# UI Styling Configuration
+VITE_CHAT_BUBBLE_USER_MESSAGE_BG_COLOR=#0066cc
+VITE_CHAT_BUBBLE_AI_MESSAGE_BG_COLOR=#f8f9fa
+VITE_CHAT_BUBBLE_FAVICON_BG_COLOR=#0066cc
+
+# Branding Configuration
+VITE_CHAT_BUBBLE_CHAT_TITLE=Customer Support
+```
 
 ### Window Object Configuration
 
@@ -66,7 +84,7 @@ Create a `.env` by copying `.env.example` file in your project root with the fol
 </script>
 ```
 
-### Via data attributes (Multiple chat bubbles):\*\*
+### Data attributes (Multiple chat bubbles):\*\*
 
 ```html
 <div
@@ -84,30 +102,16 @@ Create a `.env` by copying `.env.example` file in your project root with the fol
 
 For simple integration instructions, see [README.md](README.md) which provides a streamlined guide for customers.
 
-## Build and Deploy
+## Deployment
 
-This project builds a standalone widget that can be integrated into any website.
+### Automated Publishing
 
-**What gets bundled:**
+The GitHub Actions workflow automatically builds and publishes to npm when:
 
-- ✅ All logic and request/response interceptors
-- ✅ Environment variable configuration
-- ✅ All chat functionality
-- ✅ UI components and styling
+1. A version bump is created and committed to a PR
+2. The PR is merged to the `main` branch
 
-**Build and deployment steps:**
-
-1. **Configure environment variables** for production:
-
-```bash
-# Production .env file
-VITE_CHAT_BUBBLE_API_URL=https://company.headwai-one.at
-VITE_CHAT_BUBBLE_ASSISTANT_ID=customer-support-assistant-id
-```
-
-2. **Bump package version**
-
-Use npm's built-in version command which automatically updates `package.json`, `package-lock.json`, creates a git commit, and tags the release:
+**Version bump commands:**
 
 ```bash
 # Patch version bump (e.g., 6.3.0 -> 6.3.1)
@@ -118,31 +122,6 @@ npm version minor
 
 # Major version bump (e.g., 6.3.0 -> 7.0.0)
 npm version major
-
-# Specific version
-npm version 6.4.0
-```
-
-## Publishing to NPM and jsDelivr Access
-
-### Publishing Steps
-
-3. **Build widget**:
-
-```bash
-npm run build
-```
-
-4. **Login to NPM** (if not already logged in):
-
-```bash
-npm login
-```
-
-5. **Publish the package**:
-
-```bash
-npm publish
 ```
 
 ### jsDelivr CDN Access
