@@ -245,11 +245,9 @@
         web_search: false,
         memory: false,
       },
-      id: '', // placeholder for current user message
       model: assistantId,
       // model_item: {} // placeholder for model item if needed
       params: {},
-      parent_id: '', // placeholder for parent message ID
       // session_id: 'chat-bubble-session', // placeholder for session ID
       stream: true, // Ensure the API endpoint knows we want streaming
       tool_servers: [],
