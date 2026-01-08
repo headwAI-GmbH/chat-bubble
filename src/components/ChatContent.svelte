@@ -30,6 +30,7 @@
     currentReferences,
     currentAssistantMessageContent,
     currentAssistantMessageId,
+    currentUserMessageId,
     chatId,
     messageHistory,
     isChatOpen,
@@ -232,18 +233,24 @@
       ...(apiKey && { Authorization: `Bearer ${apiKey}` }),
     },
     additionalBodyProps: {
-      model: assistantId,
-      stream: true, // Ensure the API endpoint knows we want streaming
-      params: {},
-      tool_servers: [],
+      // background_tasks: {
+      //   title_generation: true,
+      //   tags_generation: true,
+      //   follow_up_generation: false,
+      // },
+      ...($chatId && { chat_id: $chatId }), // Include chat_id only if we have one
       features: {
         image_generation: false,
         code_interpreter: false,
         web_search: false,
         memory: false,
       },
-      id: '', // placeholder for current user message
+      model: assistantId,
+      // model_item: {} // placeholder for model item if needed
+      params: {},
       // session_id: 'chat-bubble-session', // placeholder for session ID
+      stream: true, // Ensure the API endpoint knows we want streaming
+      tool_servers: [],
       variables: {
         '{{USER_NAME}}': 'David Schneebauer | headwAI GmbH',
         '{{USER_LOCATION}}': 'Unknown',
@@ -260,13 +267,6 @@
           Intl.DateTimeFormat().resolvedOptions().timeZone,
         '{{USER_LANGUAGE}}': 'en-GB',
       },
-
-      ...($chatId && { chat_id: $chatId }), // Include chat_id only if we have one
-      // background_tasks: {
-      //   title_generation: true,
-      //   tags_generation: true,
-      //   follow_up_generation: false,
-      // },
     },
     stream: true,
   };
@@ -602,9 +602,39 @@
       logger.log('Creating new chat for first user message');
       await createNewChat();
     }
+
     if (details.body && details.body.messages) {
+      // Generate new message IDs for this request if not already set
+      if (!$currentUserMessageId) {
+        currentUserMessageId.set(generateUUID());
+      }
+      if (!$currentAssistantMessageId) {
+        currentAssistantMessageId.set(generateUUID());
+      }
+
       details.body.chat_id = $chatId;
       details.body.id = $currentAssistantMessageId;
+      details.body.parent_id = $currentUserMessageId;
+
+      // Add parent message to the request body if available
+      if ($messageHistory.length > 0) {
+        // Get the last non-feedback message from history as the parent for the current user message
+        const lastNonFeedbackMessage = [...$messageHistory]
+          .reverse()
+          .find((msg) => msg.role !== DEEP_CHAT_FEEDBACK_ROLE);
+
+        if (lastNonFeedbackMessage) {
+          details.body.parent_message = {
+            id: lastNonFeedbackMessage.id,
+            parentId: lastNonFeedbackMessage.parentId || null,
+            childrenIds: lastNonFeedbackMessage.childrenIds || [],
+            role: lastNonFeedbackMessage.role,
+            content: lastNonFeedbackMessage.content,
+            timestamp: lastNonFeedbackMessage.timestamp,
+            models: lastNonFeedbackMessage.models || [assistantId],
+          };
+        }
+      }
 
       details.body.messages = removeReferencesFromMessages(
         transformMessagesFromDeepChatToHeadwai(details.body.messages),
@@ -769,6 +799,8 @@
       currentAssistantMessageContent.set('');
       currentAssistantMessageSources.set([]);
       currentReferences.set([]);
+      currentUserMessageId.set(null);
+      currentAssistantMessageId.set(null);
 
       deepChatRef.disableSubmitButton(false);
     }
@@ -790,10 +822,16 @@
       const timestamp = Math.floor(Date.now() / 1000);
       const models = [assistantId];
 
-      // Create message IDs
-      const userMessageId = generateUUID();
-      const assistantMessageId = generateUUID();
+      // Use existing message IDs from stores (set earlier in requestInterceptor)
+      const userMessageId = $currentUserMessageId;
+      const assistantMessageId = $currentAssistantMessageId;
 
+      if (!userMessageId || !assistantMessageId) {
+        logger.error(
+          'Missing message IDs in storeChatHistory; expected IDs to be set by requestInterceptor',
+        );
+        return;
+      }
       // Find the previous message to link to
       const previousMessage = $messageHistory[$messageHistory.length - 1];
 
@@ -1027,6 +1065,8 @@
       currentAssistantMessageContent.set('');
       currentUserMessageContent.set('');
       currentAssistantMessageSources.set([]);
+      currentUserMessageId.set(null);
+      currentAssistantMessageId.set(null);
       deepChatHistory = initialHistory;
 
       // Reset title generation tracking

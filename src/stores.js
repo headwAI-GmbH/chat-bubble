@@ -6,6 +6,8 @@ export const currentAssistantMessageContent = writable('');
 
 export const currentAssistantMessageId = writable(null);
 
+export const currentUserMessageId = writable(null);
+
 export const currentAssistantMessageSources = writable([]);
 
 export const currentReferences = writable([]);

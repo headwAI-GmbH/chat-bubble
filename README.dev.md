@@ -43,9 +43,6 @@ npm run dev
  http://localhost:5174/
 ```
 
-7. Alternatively, build and test deployed version:
-   [Build and Deploy](#build-and-deploy) and open `./test-widget.html` in a browser.
-
 ## Configuration
 
 The HeadwAI Chat Bubble can be configured using environment variables or by changing the attributes of the instance.
@@ -53,6 +50,27 @@ The HeadwAI Chat Bubble can be configured using environment variables or by chan
 ### Environment Variables
 
 Create a `.env` by copying `.env.example` file in your project root with the following variables:
+
+All configuration attributes listed in the [Configuration section of README.md](README.md#configuration) can be overwritten using VITE\_ environment variables. For example:
+
+```bash
+# Production .env file - Core API Configuration
+VITE_CHAT_BUBBLE_API_URL=https://company.headwai-one.at
+VITE_CHAT_BUBBLE_ASSISTANT_ID=customer-support-assistant-id
+
+# Message Configuration
+VITE_CHAT_BUBBLE_MAX_MESSAGES=50
+VITE_CHAT_BUBBLE_INITIAL_MESSAGE=Welcome! How can we help you today?
+VITE_CHAT_BUBBLE_PLACEHOLDER_TEXT=Type your message here...
+
+# UI Styling Configuration
+VITE_CHAT_BUBBLE_USER_MESSAGE_BG_COLOR=#0066cc
+VITE_CHAT_BUBBLE_AI_MESSAGE_BG_COLOR=#f8f9fa
+VITE_CHAT_BUBBLE_FAVICON_BG_COLOR=#0066cc
+
+# Branding Configuration
+VITE_CHAT_BUBBLE_CHAT_TITLE=Customer Support
+```
 
 ### Window Object Configuration
 
@@ -66,7 +84,7 @@ Create a `.env` by copying `.env.example` file in your project root with the fol
 </script>
 ```
 
-### Via data attributes (Multiple chat bubbles):\*\*
+### Data attributes (Multiple chat bubbles):\*\*
 
 ```html
 <div
@@ -84,30 +102,16 @@ Create a `.env` by copying `.env.example` file in your project root with the fol
 
 For simple integration instructions, see [README.md](README.md) which provides a streamlined guide for customers.
 
-## Build and Deploy
+## Deployment
 
-This project builds a standalone widget that can be integrated into any website.
+### Automated Publishing
 
-**What gets bundled:**
+The GitHub Actions workflow automatically builds and publishes to npm when:
 
-- ✅ All logic and request/response interceptors
-- ✅ Environment variable configuration
-- ✅ All chat functionality
-- ✅ UI components and styling
+1. A version bump is created and committed to a PR
+2. The PR is merged to the `main` branch
 
-**Build and deployment steps:**
-
-1. **Configure environment variables** for production:
-
-```bash
-# Production .env file
-VITE_CHAT_BUBBLE_API_URL=https://company.headwai-one.at
-VITE_CHAT_BUBBLE_ASSISTANT_ID=customer-support-assistant-id
-```
-
-2. **Bump package version**
-
-Use npm's built-in version command which automatically updates `package.json`, `package-lock.json`, creates a git commit, and tags the release:
+**Version bump commands:**
 
 ```bash
 # Patch version bump (e.g., 6.3.0 -> 6.3.1)
@@ -118,31 +122,6 @@ npm version minor
 
 # Major version bump (e.g., 6.3.0 -> 7.0.0)
 npm version major
-
-# Specific version
-npm version 6.4.0
-```
-
-## Publishing to NPM and jsDelivr Access
-
-### Publishing Steps
-
-3. **Build widget**:
-
-```bash
-npm run build
-```
-
-4. **Login to NPM** (if not already logged in):
-
-```bash
-npm login
-```
-
-5. **Publish the package**:
-
-```bash
-npm publish
 ```
 
 ### jsDelivr CDN Access
@@ -380,7 +359,28 @@ Origin: http://localhost:5174
         "{{CURRENT_TIMEZONE}}": "Europe/Lisbon",
         "{{USER_LANGUAGE}}": "en-GB"
     },
-    "chat_id": "3cd6f38c-effc-4038-948a-4fd345ea19b1"
+    "chat_id": "3cd6f38c-effc-4038-948a-4fd345ea19b1",
+    "parent_id": "2860fdae-4c43-4f59-8217-33dfc92b47d3", // ID of the parent user message
+    "parent_message": { // complete parent user message object
+        "id": "2860fdae-4c43-4f59-8217-33dfc92b47d3",
+        "role": "user",
+        "content": "previous user message",
+        "timestamp": 1760362655
+    },
+    "id": "29948ec6-6975-4d3a-b019-ceb8b7f7c698", // ID for the new assistant message being created
+    "params": {}, // optional - additional parameters
+    "tool_servers": [], // optional - tool server configurations
+    "features": { // optional - feature flags
+        "image_generation": false,
+        "code_interpreter": false,
+        "web_search": false,
+        "memory": false
+    },
+    "background_tasks": { // optional - background task configurations
+        "title_generation": true,
+        "tags_generation": false,
+        "follow_up_generation": false
+    }
 }
 
 ```
@@ -845,224 +845,6 @@ Origin: http://localhost:5174
   "updated_at": 1760434499
 }
 ```
-
-### Configuration Attributes
-
-The HeadwAI Chat Bubble can be configured using environment variables, data attributes, or runtime configuration. All attributes have fallback defaults.
-
-#### Core API Configuration
-
-| Attribute     | Environment Variable            | Data Attribute                  | Purpose                                   | Default             |
-| ------------- | ------------------------------- | ------------------------------- | ----------------------------------------- | ------------------- |
-| `apiUrl`      | `VITE_CHAT_BUBBLE_API_URL`      | `data-chat-bubble-api-url`      | Base URL for API endpoints                | `https://localhost` |
-| `assistantId` | `VITE_CHAT_BUBBLE_ASSISTANT_ID` | `data-chat-bubble-assistant-id` | Assistant identifier to use for responses | `test-model`        |
-| Attribute     | Environment Variable            | Data Attribute                  | Purpose                                   | Default             |
-| ------------- | ------------------------------- | ------------------------------- | ----------------------------------------- | ------------------- |
-| `apiUrl`      | `VITE_CHAT_BUBBLE_API_URL`      | `data-chat-bubble-api-url`      | Base URL for API endpoints                | `https://localhost` |
-| `assistantId` | `VITE_CHAT_BUBBLE_ASSISTANT_ID` | `data-chat-bubble-assistant-id` | Assistant identifier to use for responses | `test-model`        |
-
-#### Message Configuration
-
-| Attribute         | Environment Variable                | Data Attribute                      | Purpose                                                | Default                     |
-| ----------------- | ----------------------------------- | ----------------------------------- | ------------------------------------------------------ | --------------------------- |
-| `maxMessages`     | `VITE_CHAT_BUBBLE_MAX_MESSAGES`     | `data-chat-bubble-max-messages`     | Maximum messages to include in context (0 = unlimited) | `0`                         |
-| `initialMessage`  | `VITE_CHAT_BUBBLE_INITIAL_MESSAGE`  | `data-chat-bubble-initial-message`  | First message shown when chat opens                    | `Hey, how can I help you?`  |
-| `placeholderText` | `VITE_CHAT_BUBBLE_PLACEHOLDER_TEXT` | `data-chat-bubble-placeholder-text` | Input field placeholder text                           | `Enter your questions here` |
-
-#### UI Styling Configuration
-
-| Attribute                        | Environment Variable                           | Data Attribute                                       | Purpose                               | Default   |
-| -------------------------------- | ---------------------------------------------- | ---------------------------------------------------- | ------------------------------------- | --------- |
-| `userMessageBackgroundColor`     | `VITE_CHAT_BUBBLE_USER_MESSAGE_BG_COLOR`       | `data-chat-bubble-user-message-background-color`     | Background color for user messages    | `#007bff` |
-| `userMessageTextColor`           | `VITE_CHAT_BUBBLE_USER_MESSAGE_TEXT_COLOR`     | `data-chat-bubble-user-message-text-color`           | Text color for user messages          | `#000000` |
-| `aiMessageBackgroundColor`       | `VITE_CHAT_BUBBLE_AI_MESSAGE_BG_COLOR`         | `data-chat-bubble-ai-message-background-color`       | Background color for AI messages      | `#f1f3f4` |
-| `aiMessageTextColor`             | `VITE_CHAT_BUBBLE_AI_MESSAGE_TEXT_COLOR`       | `data-chat-bubble-ai-message-text-color`             | Text color for AI messages            | `#000000` |
-| `feedbackMessageBackgroundColor` | `VITE_CHAT_BUBBLE_FEEDBACK_MESSAGE_BG_COLOR`   | `data-chat-bubble-feedback-message-background-color` | Background color for feedback buttons | `#ffffff` |
-| `feedbackMessageTextColor`       | `VITE_CHAT_BUBBLE_FEEDBACK_MESSAGE_TEXT_COLOR` | `data-chat-bubble-feedback-message-text-color`       | Text color for feedback buttons       | `#000000` |
-| `faviconBackgroundColor`         | `VITE_CHAT_BUBBLE_FAVICON_BG_COLOR`            | `data-chat-bubble-favicon-background-color`          | Background color for chat icon        | `#667eea` |
-| `fontFamily`                     | `VITE_CHAT_BUBBLE_FONT_FAMILY`                 | `data-chat-bubble-font-family`                       | Font family for chat interface        | `inherit` |
-| `fontSize`                       | `VITE_CHAT_BUBBLE_FONT_SIZE`                   | `data-chat-bubble-font-size`                         | Font size for chat interface          | `inherit` |
-
-#### Branding Configuration
-
-| Attribute     | Environment Variable            | Data Attribute                  | Purpose                    | Default               |
-| ------------- | ------------------------------- | ------------------------------- | -------------------------- | --------------------- |
-| `chatTitle`   | `VITE_CHAT_BUBBLE_CHAT_TITLE`   | `data-chat-bubble-chat-title`   | Title shown in chat header | `HeadwAI Chat Bubble` |
-| `faviconPath` | `VITE_CHAT_BUBBLE_FAVICON_PATH` | `data-chat-bubble-favicon-path` | Path to chat icon/logo     | `./icons/favicon.svg` |
-
-### API Request Flow and Data Format
-
-#### Chat Completions Request
-
-```javascript
-{
-  "messages": [
-    {
-      "role": "user|assistant",
-      "content": "message text"
-    }
-  ],
-  "model": "customer-support-assistant-id",
-  "stream": true,
-  "chat_id": "uuid-if-existing",
-  "params": {},
-  "tool_servers": [],
-  "features": {
-    "image_generation": false,
-    "code_interpreter": false,
-    "web_search": false,
-    "memory": false
-  },
-  "variables": {
-    "{{USER_NAME}}": "David Schneebauer | headwAI GmbH",
-    "{{USER_LOCATION}}": "Unknown",
-    "{{CURRENT_DATETIME}}": "2025-01-07 15:30:45",
-    // ... additional template variables
-  },
-  "background_tasks": {
-    "title_generation": true,
-    "tags_generation": false,
-    "follow_up_generation": false
-  }
-}
-```
-
-#### Chat Creation Request
-
-```javascript
-{
-  "assistantId": "customer-support-assistant-id",
-  "chat": {
-    "id": "",
-    "title": "New Chatbubble Chat",
-    "models": ["customer-support-assistant-id"],
-    "params": {},
-    "history": {
-      "messages": {"message-id": {...}},
-      "currentId": "last-message-id"
-    },
-    "messages": [{
-      "id": "uuid",
-      "parentId": "parent-uuid",
-      "childrenIds": ["child-uuid"],
-      "role": "assistant|user",
-      "content": "message content",
-      "timestamp": 1704636645,
-      "models": ["customer-support-assistant-id"]
-    }],
-    "tags": [],
-    "timestamp": 1704636645000
-  },
-  "folder_id": null
-}
-```
-
-#### Chat Storage Request
-
-```javascript
-{
-  "assistantId": "customer-support-assistant-id",
-  "chat": {
-    "models": ["customer-support-assistant-id"],
-    "history": {
-      "messages": {
-        "message-uuid-1": {
-          "id": "message-uuid-1",
-          "parentId": null,
-          "childrenIds": ["message-uuid-2"],
-          "role": "user",
-          "content": "user message content",
-          "timestamp": 1704636645,
-          "models": ["customer-support-assistant-id"]
-        },
-        "message-uuid-2": {
-          "id": "message-uuid-2",
-          "parentId": "message-uuid-1",
-          "childrenIds": [],
-          "role": "assistant",
-          "content": "assistant response content",
-          "model": "customer-support-assistant-id",
-          "modelId": "customer-support-assistant-id",
-          "modelIdx": 0,
-          "timestamp": 1704636645,
-          "sources": []
-        }
-      },
-      "currentId": "message-uuid-2"
-    },
-    "messages": [
-      {
-        "id": "message-uuid-1",
-        "parentId": null,
-        "childrenIds": ["message-uuid-2"],
-        "role": "user",
-        "content": "user message content",
-        "timestamp": 1704636645,
-        "models": ["customer-support-assistant-id"]
-      },
-      {
-        "id": "message-uuid-2",
-        "parentId": "message-uuid-1",
-        "childrenIds": [],
-        "role": "assistant",
-        "content": "assistant response content",
-        "model": "customer-support-assistant-id",
-        "modelId": "customer-support-assistant-id",
-        "modelIdx": 0,
-        "timestamp": 1704636645,
-        "sources": []
-      }
-    ],
-    "params": {}
-  }
-}
-```
-
-#### Feedback Request
-
-```javascript
-{
-  "assistantId": "customer-support-assistant-id",
-  "type": "rating",
-  "data": {
-    "rating": 1, // 1 for positive, -1 for negative
-    "model_id": "customer-support-assistant-id"
-  },
-  "meta": {
-    "model_id": "customer-support-assistant-id",
-    "message_id": "message-uuid",
-    "message_index": 2,
-    "chat_id": "chat-uuid",
-    "base_models": {"customer-support-assistant-id": "customer-support-assistant-id"}
-  },
-  "snapshot": {
-    "chat": {
-      // Complete chat state for context
-    }
-  }
-}
-```
-
-## API Compatibility
-
-This component is designed to work with OpenAI-compatible APIs. The request and response interceptors handle the message format transformation between deep-chat and OpenAI formats.
-
-### Supported Message Flow
-
-1. **User Input** → Deep Chat format
-2. **Request Interceptor** → Transforms to OpenAI format
-3. **API Call** → Your configured endpoint
-4. **Response Interceptor** → Transforms back to Deep Chat format
-5. **Display** → Rendered in chat interface
-
-## Development
-
-### Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build widget for production
-- `npm run build:widget` - Build standalone widget
-- `npm run preview` - Preview production build
 
 ## Troubleshooting
 

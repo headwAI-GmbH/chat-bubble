@@ -1,5 +1,7 @@
 # HeadwAI Chat Bubble
 
+**🎮 Try it live:** Experience the HeadwAI Chat Bubble at [chat-bubble.headwai.org](https://chat-bubble.headwai.org/) - configure and test all features in a live environment.
+
 ## Features
 
 - 🚀 Easy integration into any Website
@@ -27,26 +29,26 @@ Add the HeadwAI Chat Bubble to the respective .html file.
     <script>
       // Runtime configuration override
       window.HEADWAI_CHAT_BUBBLE_CONFIG = {
-        apiUrl: 'https://company.headwai-one.at', // required
-        apiKey: 'your-api-key-here', // conditionally required: required for Open WebUI instances, optional for HeadwAI ONE
-        assistantId: 'customer-support-assistant-id', // required
-        maxMessages: 0, // optional - 0 means unlimited
-        placeholderText: 'Ask your question here!', // optional - default: 'Enter your questions here'
-        faviconPath: 'https://cdn.company.at/icons/favicon.svg', // optional - default: '/icons/favicon.svg'
-        initialMessage: 'Hey! My name is Supporty, how can I help you?', // optional - default: 'Hey, how can I help you?'
-        chatTitle: 'Customer Support', // optional - default: 'HeadwAI Chat Bubble'
-        userMessageBackgroundColor: '#007bff', // optional - default: '#007bff'
-        aiMessageBackgroundColor: '#f1f3f4', // optional - default: '#f1f3f4'
-        userMessageTextColor: '#000000', // optional - default: '#000000'
-        aiMessageTextColor: '#000000', // optional - default: '#000000'
-        faviconBackgroundColor: '#667eea', // optional - default: '#667eea'
-        fontFamily: '"Inter", system-ui, sans-serif', // optional - default: 'inherit'
-        fontSize: '16px', // optional - default: 'inherit'
-        locale: 'de-DE', // optional - auto-detects browser language, supported: en-GB, de-DE, de-AT
-        disclaimerTitle: 'Terms of Service', // optional - default: 'Terms of Use'
-        disclaimerMessage: 'Please accept our terms before using this service.', // optional - custom disclaimer message
-        infoTitle: 'Support Information', // optional - default: 'About this AI Assistant'
-        infoMessage: 'For help, contact support@example.com', // optional - custom info overlay message
+        apiUrl: 'https://company.headwai-one.at',
+        apiKey: 'your-api-key-here',
+        assistantId: 'customer-support-assistant-id',
+        maxMessages: 0,
+        placeholderText: 'Ask your question here!',
+        faviconPath: 'https://cdn.company.at/icons/favicon.svg',
+        initialMessage: 'Hey! My name is Supporty, how can I help you?',
+        chatTitle: 'Customer Support',
+        userMessageBackgroundColor: '#007bff',
+        aiMessageBackgroundColor: '#f1f3f4',
+        userMessageTextColor: '#000000',
+        aiMessageTextColor: '#000000',
+        faviconBackgroundColor: '#667eea',
+        fontFamily: '"Inter", system-ui, sans-serif',
+        fontSize: '16px',
+        locale: 'de-DE',
+        disclaimerTitle: 'Terms of Service',
+        disclaimerMessage: 'Please accept our terms before using this service.',
+        infoTitle: 'Support Information',
+        infoMessage: 'For help, contact support@example.com',
       };
     </script>
   </head>
@@ -151,7 +153,7 @@ The HeadwAI Chat Bubble can be configured using either the global `window.HEADWA
 
 #### `apiUrl`
 
-**Type:** `string` | **Required:** ✅  
+**Type:** `string` | **Required:** ✅ | **Default:** `'https://localhost'`
 The base URL of your HeadwAI ONE or Open WebUI API endpoint where the HeadwAI Chat Bubble will send messages. This is the same URL you access your HeadwAI ONE or Open WebUI instance in the web browser.
 
 ```javascript
@@ -160,7 +162,7 @@ apiUrl: 'https://company.headwai-one.at';
 
 #### `apiKey`
 
-**Type:** `string` | **Required:** ⚠️ (Conditional)  
+**Type:** `string` | **Required:** ⚠️ (Conditional) | **Default:**
 API key for authentication with the API. This is **required** when using the HeadwAI Chat Bubble with a plain [Open WebUI](https://github.com/open-webui/open-webui) instance. When used with a HeadwAI ONE instance an API key is not needed.
 
 ```javascript
@@ -202,7 +204,7 @@ maxMessages: 10; // Keep and use only last 10 messages
 
 #### `placeholderText`
 
-**Type:** `string` | **Default:** `'Type your message...'`  
+**Type:** `string` | **Default:** `'Enter your questions here'`  
 The placeholder text displayed in the message input field when it's empty.
 
 ```javascript
@@ -211,7 +213,7 @@ placeholderText: 'Ask your question here!';
 
 #### `faviconPath`
 
-**Type:** `string` | **Default:** `'/icons/favicon.svg'`  
+**Type:** `string` | **Default:** `'./icons/favicon.svg'`  
 Path or URL to the icon displayed on the HeadwAI Chat Bubble toggle button. Can be a relative path or absolute URL.
 
 ```javascript
@@ -220,7 +222,7 @@ faviconPath: 'https://cdn.company.at/icons/favicon.svg';
 
 #### `initialMessage`
 
-**Type:** `string` | **Default:** `undefined`  
+**Type:** `string` | **Default:** `'Hey, how can I help you?'`  
 An optional welcome message that appears when the chat is first opened. If not set, no initial message is displayed.
 
 ```javascript
@@ -293,6 +295,24 @@ Text color for HeadwAI Chat Bubble messages. Accepts any valid CSS color value.
 
 ```javascript
 aiMessageTextColor: '#333333';
+```
+
+#### `feedbackMessageBackgroundColor`
+
+**Type:** `string` | **Default:** `'#ffffff'`  
+Background color for feedback buttons (thumbs up/down). Accepts any valid CSS color value.
+
+```javascript
+feedbackMessageBackgroundColor: '#ffffff';
+```
+
+#### `feedbackMessageTextColor`
+
+**Type:** `string` | **Default:** `'#000000'`  
+Text color for feedback buttons (thumbs up/down). Accepts any valid CSS color value.
+
+```javascript
+feedbackMessageTextColor: '#000000';
 ```
 
 #### `faviconBackgroundColor`
