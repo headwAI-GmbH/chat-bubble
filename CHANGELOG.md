@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.2.0] - 2026-01-21
+
+## Added
+
+- Capability to render html in disclaimer message and info message.
+
 ## [8.0.2] - 2026-01-05
 
 ### Changed
