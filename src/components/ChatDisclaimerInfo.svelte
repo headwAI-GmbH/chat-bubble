@@ -14,20 +14,24 @@
     on:keydown|stopPropagation
   >
     <div class="disclaimer-info-header">
-      <h3 id="disclaimer-info-title">{title}</h3>
+      <h3 id="disclaimer-info-title">{@html title}</h3>
       <button
         class="close-info-button"
         on:click={closeDisclaimerInfo}
         aria-label="Close information"
         bind:this={closeButtonElement}
       >
-        <svg class="close-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          class="close-icon"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path class="svg-path" d="M18 6L6 18M6 6L18 18" />
         </svg>
       </button>
     </div>
     <div class="disclaimer-info-body">
-      <p>{message}</p>
+      <div class="message-content">{@html message}</div>
     </div>
   </div>
 </div>
@@ -225,10 +229,119 @@
   }
 
   .disclaimer-info-body p {
-    margin: 0 0 12px 0;
+    margin: 0 0 0.75em 0;
     font-size: var(--font-size, 1em);
     font-family: var(--font-family, inherit);
     line-height: 1.5;
+  }
+
+  .message-content {
+    font-size: var(--font-size, 1em);
+    font-family: var(--font-family, inherit);
+    line-height: 1.5;
+  }
+
+  .message-content p {
+    margin: 0 0 0.75em 0;
+  }
+
+  .message-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .message-content h1,
+  .message-content h2,
+  .message-content h3,
+  .message-content h4,
+  .message-content h5,
+  .message-content h6 {
+    margin: 1em 0 0.5em 0;
+    font-weight: 600;
+    font-family: var(--font-family, inherit);
+  }
+
+  .message-content h1:first-child,
+  .message-content h2:first-child,
+  .message-content h3:first-child,
+  .message-content h4:first-child,
+  .message-content h5:first-child,
+  .message-content h6:first-child {
+    margin-top: 0;
+  }
+
+  .message-content h1 {
+    font-size: 1.5em;
+  }
+  .message-content h2 {
+    font-size: 1.3em;
+  }
+  .message-content h3 {
+    font-size: 1.2em;
+  }
+  .message-content h4 {
+    font-size: 1.1em;
+  }
+  .message-content h5 {
+    font-size: 1em;
+  }
+  .message-content h6 {
+    font-size: 1em;
+  }
+
+  .message-content ul,
+  .message-content ol {
+    margin: 0.5em 0;
+    padding-left: 1.25em;
+  }
+
+  .message-content li {
+    margin: 0.25em 0;
+  }
+
+  .message-content a {
+    color: var(--submit-button-color, #007bff);
+    text-decoration: underline;
+  }
+
+  .message-content a:hover {
+    text-decoration: none;
+  }
+
+  .message-content strong {
+    font-weight: 600;
+  }
+
+  .message-content em {
+    font-style: italic;
+  }
+
+  .message-content code {
+    background-color: #f5f5f5;
+    padding: 0.125em 0.25em;
+    border-radius: 0.25em;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+
+  .message-content pre {
+    background-color: #f5f5f5;
+    padding: 0.75em;
+    border-radius: 0.25em;
+    overflow-x: auto;
+    margin: 0.75em 0;
+  }
+
+  .message-content pre code {
+    background: none;
+    padding: 0;
+  }
+
+  .message-content blockquote {
+    margin: 0.75em 0;
+    padding: 0.5em 1em;
+    border-left: 0.25em solid var(--submit-button-color, #007bff);
+    background-color: #f9f9f9;
+    font-style: italic;
   }
 
   /* Mobile optimizations */

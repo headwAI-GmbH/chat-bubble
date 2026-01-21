@@ -378,42 +378,58 @@ fontSize: '14px';
 
 #### `disclaimerTitle`
 
-**Type:** `string` | **Default:** Translation-based (`'Terms of Use'` in English, `'Nutzungsbedingungen'` in German)  
+**Type:** `string` | **Default:** Translation-based (`'Terms of <strong>Service</strong>'` in English, `'Nutzungs<strong>bedingungen</strong>'` in German)  
 Title displayed in the initial disclaimer dialog that users must accept before using the chat. This appears when the chat is first opened and the user hasn't previously accepted the terms.
 
+**HTML Support:** ✅ This field supports HTML formatting for rich text display.
+
 ```javascript
-disclaimerTitle: 'Privacy Notice';
-disclaimerTitle: 'Terms of Service';
+disclaimerTitle: 'Privacy <strong>Notice</strong>';
+disclaimerTitle: 'Terms of <em>Service</em>';
 ```
 
 #### `disclaimerMessage`
 
-**Type:** `string` | **Default:** Translation-based disclaimer message  
+**Type:** `string` | **Default:** Translation-based disclaimer message with HTML formatting  
 Main message text displayed in the initial disclaimer dialog. This is the content users must read and accept before they can start chatting.
 
+**HTML Support:** ✅ This field supports HTML formatting including headings, lists, links, and text formatting.
+
 ```javascript
-disclaimerMessage: 'By using this service, you agree to our terms and privacy policy.';
-disclaimerMessage: 'Please review our terms before continuing.';
+disclaimerMessage: `<p>By using this service, you agree to:</p>
+<ul>
+  <li><strong>Privacy:</strong> Your data is protected</li>
+  <li>See <a href="/terms">full terms</a></li>
+</ul>`;
 ```
 
 #### `infoTitle`
 
-**Type:** `string` | **Default:** Translation-based (`'About this AI Assistant'` in English, `'Über diesen KI-Assistenten'` in German)  
+**Type:** `string` | **Default:** Translation-based (`'Information'` in English, `'Informationen'` in German)  
 Title displayed in the info overlay that can be accessed via the info button (ⓘ) in the chat header. This provides users with additional information about the service after they've started chatting.
 
+**HTML Support:** ✅ This field supports HTML formatting for rich text display.
+
 ```javascript
-infoTitle: 'How This Works';
-infoTitle: 'Support Information';
+infoTitle: 'How This <em>Works</em>';
+infoTitle: 'Support <strong>Information</strong>';
 ```
 
 #### `infoMessage`
 
-**Type:** `string` | **Default:** Translation-based info message  
+**Type:** `string` | **Default:** Translation-based info message with HTML formatting  
 Content displayed in the info overlay accessible via the info button. Use this to provide help information, contact details, or explain how the AI assistant works.
 
+**HTML Support:** ✅ This field supports HTML formatting including headings, lists, links, code blocks, and blockquotes.
+
 ```javascript
-infoMessage: 'Our AI assistant uses advanced technology to help answer your questions. For additional support, contact us at support@company.com';
-infoMessage: 'This chat service is powered by artificial intelligence and may occasionally provide inaccurate information.';
+infoMessage: `<h4>How We Help</h4>
+<p>Our AI assistant uses advanced technology. Features:</p>
+<ul>
+  <li>Real-time responses</li>
+  <li>Secure <code>encryption</code></li>
+</ul>
+<blockquote>Contact support@company.com for help</blockquote>`;
 ```
 
 **Note:** The disclaimer and info content serve different purposes:

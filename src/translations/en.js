@@ -21,15 +21,26 @@ export default {
       },
     },
     disclaimer: {
-      title: 'Terms of Use',
-      message:
-        'Before using this AI chat service, please review and accept the terms',
+      title: 'Terms of <strong>Service</strong>',
+      message: `<p>By using this chat, you agree to:</p>
+<ul>
+  <li><strong>Privacy:</strong> Your data is protected</li>
+  <li><strong>Usage:</strong> Chat responsibly</li>
+  <li>See <a href="/terms">full terms</a></li>
+</ul>`,
       accept: 'Accept',
       decline: 'Decline',
     },
     info: {
-      title: 'About this AI Assistant',
-      message: 'This chat service is powered by artificial intelligence.',
+      title: 'Information',
+      message: `<h4>Privacy Notice</h4>
+<p>This chat uses <strong>AI technology</strong>. Key points:</p>
+<ul>
+  <li>Messages are processed for <em>AI responses</em></li>
+  <li>See our <a href="/privacy">privacy policy</a></li>
+  <li>Use <code>secure connections</code> only</li>
+</ul>
+<blockquote>Your privacy is our priority</blockquote>`,
     },
   },
 };
