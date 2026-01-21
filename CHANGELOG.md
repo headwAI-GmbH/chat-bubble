@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.0] - 2026-01-21
+
+## Added
+
+- Speech Bubble Hint. A subtle way to catch the users attention.
+
 ## [8.2.0] - 2026-01-21
 
 ## Added
