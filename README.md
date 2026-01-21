@@ -437,6 +437,71 @@ infoMessage: `<h4>How We Help</h4>
 - **Disclaimer**: Legal/privacy notice shown once before first use (requires acceptance)
 - **Info**: Helpful information accessible anytime via the info button in the chat header
 
+### Speech Bubble Hint Configuration
+
+The speech bubble hint is a helpful tooltip that appears next to the chat icon to encourage user interaction. It uses **session-based display logic** to provide an optimal user experience.
+
+**Display Behavior:**
+
+- ✅ **Appears**: On first page load in a new browser session, after browser restart, or when opening a new tab after closing all previous ones
+- ❌ **Doesn't appear**: On page refresh, when chat is closed/reopened, or when navigating within the same session
+
+This ensures the hint is helpful for new visitors without becoming repetitive for active users.
+
+#### `speechBubbleHintMessage`
+
+**Type:** `string` | **Default:** `'Click here if you need <strong>help</strong>!'`  
+The message displayed in the speech bubble hint that appears next to the chat icon. This hint automatically shows for a few seconds to encourage users to interact with the chat.
+
+**HTML Support:** ✅ This field supports HTML formatting for rich text display.
+
+```javascript
+speechBubbleHintMessage: 'Need <strong>assistance</strong>? Click here!';
+speechBubbleHintMessage: "Questions? <em>We're here to help!</em>";
+```
+
+#### `speechBubbleHintDuration`
+
+**Type:** `number` | **Default:** `4000` (4 seconds)  
+Duration in milliseconds for how long the speech bubble hint is displayed before it automatically disappears.
+
+```javascript
+speechBubbleHintDuration: 5000; // Show for 5 seconds
+speechBubbleHintDuration: 3000; // Show for 3 seconds
+```
+
+#### `enableSpeechBubbleHint`
+
+**Type:** `boolean` | **Default:** `true`  
+Controls whether the speech bubble hint is displayed at all. Set to `false` to completely disable the hint feature.
+
+```javascript
+enableSpeechBubbleHint: false; // Disable speech bubble hint
+enableSpeechBubbleHint: true; // Enable speech bubble hint (default)
+```
+
+#### `speechBubbleHintBackgroundColor`
+
+**Type:** `string` | **Default:** `'#ffffff'` (white)  
+Background color for the speech bubble hint. Accepts any valid CSS color value.
+
+```javascript
+speechBubbleHintBackgroundColor: '#007bff'; // Blue background
+speechBubbleHintBackgroundColor: '#28a745'; // Green background
+speechBubbleHintBackgroundColor: '#ffc107'; // Yellow background
+```
+
+#### `speechBubbleHintTextColor`
+
+**Type:** `string` | **Default:** `'#333333'` (dark gray)  
+Text color for the speech bubble hint content. Accepts any valid CSS color value.
+
+```javascript
+speechBubbleHintTextColor: '#ffffff'; // White text
+speechBubbleHintTextColor: '#000000'; // Black text
+speechBubbleHintTextColor: '#495057'; // Gray text
+```
+
 ### Data Attribute Format
 
 When using data attributes for multiple HeadwAI Chat Bubbles, convert camelCase property names to kebab-case with the `data-chat-bubble-` prefix:
@@ -450,6 +515,11 @@ When using data attributes for multiple HeadwAI Chat Bubbles, convert camelCase 
 - `disclaimerMessage` → `data-chat-bubble-disclaimer-message`
 - `infoTitle` → `data-chat-bubble-info-title`
 - `infoMessage` → `data-chat-bubble-info-message`
+- `speechBubbleHintMessage` → `data-chat-bubble-speech-bubble-hint-message`
+- `speechBubbleHintDuration` → `data-chat-bubble-speech-bubble-hint-duration`
+- `enableSpeechBubbleHint` → `data-chat-bubble-enable-speech-bubble-hint`
+- `speechBubbleHintBackgroundColor` → `data-chat-bubble-speech-bubble-hint-background-color`
+- `speechBubbleHintTextColor` → `data-chat-bubble-speech-bubble-hint-text-color`
 
 ## Troubleshooting
 
