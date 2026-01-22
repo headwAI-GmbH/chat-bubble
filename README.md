@@ -596,6 +596,100 @@ If sanitization is working correctly, no JavaScript alerts will appear, and only
 - The widget uses the latest version of DOMPurify for maximum security
 - No manual maintenance of sanitization rules is required
 
+### Security and HTML Content
+
+#### HTML Content Sanitization
+
+All HTML content in `disclaimerTitle`, `disclaimerMessage`, `infoTitle`, and `infoMessage` is automatically sanitized using **DOMPurify**, the industry-standard HTML sanitization library, to prevent XSS (Cross-Site Scripting) attacks while preserving safe formatting.
+
+**Why DOMPurify:**
+
+- **Battle-tested**: Used by millions of websites and applications worldwide
+- **Security expertise**: Maintained by security researchers who understand XSS attack vectors
+- **Regular updates**: Continuously updated to protect against new threats
+- **Performance**: Optimized for speed and efficiency
+- **Comprehensive**: Handles edge cases and browser inconsistencies
+
+**Allowed HTML Tags:**
+
+**For Message Content** (`disclaimerMessage`, `infoMessage`):
+
+- **Text formatting**: `<strong>`, `<b>`, `<em>`, `<i>`, `<u>`, `<code>`, `<span>`
+- **Structure**: `<p>`, `<h1>` through `<h6>`, `<br>`, `<ul>`, `<ol>`, `<li>`, `<blockquote>`
+- **Links**: `<a>` (with validated `href`, `title`, `target` attributes)
+
+**For Titles** (`disclaimerTitle`, `infoTitle`):
+
+- **Basic formatting only**: `<strong>`, `<b>`, `<em>`, `<i>`, `<code>`, `<span>`
+- **No links or structural elements** for security and UI consistency
+
+**Security Features:**
+
+- **Automatic threat removal**: Dangerous tags like `<script>`, `<iframe>`, `<object>` are completely removed
+- **Attribute sanitization**: Dangerous attributes like `onclick`, `onerror`, `style` are stripped
+- **URL validation**: Links only allow `http://`, `https://`, `mailto:`, and relative URLs
+- **Protocol blocking**: JavaScript URLs (`javascript:`) and data URLs (`data:`) are blocked
+- **Link security**: External links automatically get `rel="noopener noreferrer"` for security
+
+**Examples of Safe HTML Content:**
+
+```javascript
+// ✅ Safe and allowed content
+disclaimerMessage: `<p>By using this service, you agree to:</p>
+<ul>
+  <li><strong>Privacy:</strong> Your data is <em>protected</em></li>
+  <li>Use <code>secure connections</code> only</li>
+  <li>See our <a href="/terms" target="_blank">full terms</a></li>
+</ul>
+<blockquote>Your privacy is our priority</blockquote>`;
+
+// ✅ Safe title formatting
+disclaimerTitle: 'Terms of <strong>Service</strong>';
+infoTitle: 'How This <em>Works</em>';
+```
+
+**Examples of Content That Gets Sanitized:**
+
+```javascript
+// ❌ Dangerous content (automatically removed/sanitized)
+input: '<script>alert("XSS")</script>Terms of Service';
+output: 'Terms of Service'; // Script tag completely removed
+
+input: '<img src="x" onerror="alert(1)">Safe image';
+output: '<img src="x">Safe image'; // onerror attribute stripped
+
+input: '<a href="javascript:alert(1)">Click me</a>';
+output: '<a>Click me</a>'; // Dangerous href removed
+
+input: '<p onclick="malicious()">Click me</p>';
+output: '<p>Click me</p>'; // onclick attribute stripped
+```
+
+**Testing Sanitization:**
+
+To verify that your HTML content is properly sanitized, you can test with potentially dangerous input:
+
+```javascript
+// Test configuration with malicious content
+window.HEADWAI_CHAT_BUBBLE_CONFIG = {
+  disclaimerTitle: '<script>alert("XSS")</script>Safe <strong>Title</strong>',
+  disclaimerMessage: `
+    <p>Safe content</p>
+    <img src="x" onerror="alert('XSS')">
+    <a href="javascript:void(0)">Dangerous link</a>
+    <a href="https://safe-site.com">Safe link</a>
+  `,
+};
+```
+
+If sanitization is working correctly, no JavaScript alerts will appear, and only safe HTML will be rendered.
+
+**Maintenance:**
+
+- DOMPurify is automatically updated through npm updates
+- The widget uses the latest version of DOMPurify for maximum security
+- No manual maintenance of sanitization rules is required
+
 ### Data Attribute Format
 
 When using data attributes for multiple HeadwAI Chat Bubbles, convert camelCase property names to kebab-case with the `data-chat-bubble-` prefix:
