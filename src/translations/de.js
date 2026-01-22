@@ -21,16 +21,26 @@ export default {
       },
     },
     disclaimer: {
-      title: 'Nutzungsbedingungen',
-      message:
-        'Bevor Sie diesen KI-Chat-Service nutzen, lesen und akzeptieren Sie bitte die Bedingungen',
+      title: 'Nutzungs<strong>bedingungen</strong>',
+      message: `<p>Durch die Nutzung dieses Chats stimmen Sie zu:</p>
+<ul>
+  <li><strong>Datenschutz:</strong> Ihre Daten sind geschützt</li>
+  <li><strong>Nutzung:</strong> Verantwortungsvoller Umgang</li>
+  <li>Siehe <a href="/nutzungsbedingungen">vollständige Bedingungen</a></li>
+</ul>`,
       accept: 'Akzeptieren',
       decline: 'Ablehnen',
     },
     info: {
-      title: 'Über diesen KI-Assistenten',
-      message:
-        'Dieser Chat-Service wird von künstlicher Intelligenz betrieben.',
+      title: 'Informationen',
+      message: `<h4>Datenschutzhinweis</h4>
+<p>Dieser Chat verwendet <strong>KI-Technologie</strong>. Wichtige Punkte:</p>
+<ul>
+  <li>Nachrichten werden für <em>KI-Antworten</em> verarbeitet</li>
+  <li>Siehe unsere <a href="/datenschutz">Datenschutzrichtlinie</a></li>
+  <li>Verwenden Sie nur <code>sichere Verbindungen</code></li>
+</ul>
+<blockquote>Ihr Datenschutz ist unsere Priorität</blockquote>`,
     },
   },
 };

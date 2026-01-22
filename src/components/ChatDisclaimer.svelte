@@ -7,10 +7,10 @@
 >
   <div class="disclaimer-content">
     <div class="disclaimer-header">
-      <h3 id="disclaimer-title">{title}</h3>
+      <h3 id="disclaimer-title">{@html sanitizedTitle}</h3>
     </div>
     <div class="disclaimer-body">
-      <p>{message}</p>
+      <div class="message-content">{@html sanitizedMessage}</div>
     </div>
     <div class="disclaimer-actions">
       <button
@@ -35,9 +35,15 @@
 <script>
   import { getContext, onMount, onDestroy } from 'svelte';
   import { isDisclaimerAccepted, isChatOpen } from '../stores.js';
+  import { sanitizeTitle, sanitizeHtml } from '../htmlSanitizer.js';
+  import '../styles/message-content.css';
 
   export let title = '';
   export let message = '';
+
+  // Sanitize HTML content to prevent XSS attacks
+  $: sanitizedTitle = sanitizeTitle(title);
+  $: sanitizedMessage = sanitizeHtml(message);
 
   const tStore = getContext('i18n');
 
@@ -126,7 +132,7 @@
   }
 
   .disclaimer-body p {
-    margin: 0 0 12px 0;
+    margin: 0 0 0.75em 0;
     font-size: var(--font-size, 1em);
     font-family: var(--font-family, inherit);
     line-height: 1.5;

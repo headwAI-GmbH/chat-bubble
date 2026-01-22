@@ -14,20 +14,24 @@
     on:keydown|stopPropagation
   >
     <div class="disclaimer-info-header">
-      <h3 id="disclaimer-info-title">{title}</h3>
+      <h3 id="disclaimer-info-title">{@html sanitizedTitle}</h3>
       <button
         class="close-info-button"
         on:click={closeDisclaimerInfo}
         aria-label="Close information"
         bind:this={closeButtonElement}
       >
-        <svg class="close-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          class="close-icon"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path class="svg-path" d="M18 6L6 18M6 6L18 18" />
         </svg>
       </button>
     </div>
     <div class="disclaimer-info-body">
-      <p>{message}</p>
+      <div class="message-content">{@html sanitizedMessage}</div>
     </div>
   </div>
 </div>
@@ -35,9 +39,15 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { isDisclaimerInfoOpen } from '../stores.js';
+  import { sanitizeTitle, sanitizeHtml } from '../htmlSanitizer.js';
+  import '../styles/message-content.css';
 
   export let title = '';
   export let message = '';
+
+  // Sanitize HTML content to prevent XSS attacks
+  $: sanitizedTitle = sanitizeTitle(title);
+  $: sanitizedMessage = sanitizeHtml(message);
 
   let dialogElement;
   let closeButtonElement;
@@ -225,7 +235,7 @@
   }
 
   .disclaimer-info-body p {
-    margin: 0 0 12px 0;
+    margin: 0 0 0.75em 0;
     font-size: var(--font-size, 1em);
     font-family: var(--font-family, inherit);
     line-height: 1.5;
