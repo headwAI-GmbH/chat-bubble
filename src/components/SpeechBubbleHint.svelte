@@ -3,12 +3,13 @@
   class:visible={isVisible}
   style="--font-size: {fontSize}; --font-family: {fontFamily}; --bg-color: {backgroundColor}; --text-color: {textColor};"
 >
-  <div class="speech-content">{@html message}</div>
+  <div class="speech-content">{@html sanitizedMessage}</div>
   <div class="speech-tail"></div>
 </div>
 
 <script>
   import { onMount } from 'svelte';
+  import { sanitizeHtml } from '../htmlSanitizer.js';
 
   export let message = 'Click here if you need help!';
   export let displayDuration = 4000; // 4 seconds
@@ -19,6 +20,8 @@
 
   let isVisible = false;
   const SESSION_KEY = 'headwai-chat-bubble-hint-shown';
+
+  $: sanitizedMessage = sanitizeHtml(message);
 
   onMount(() => {
     // Check if the hint has already been shown in this session
@@ -80,9 +83,6 @@
     color: var(--text-color, #333);
     line-height: 1.4;
     text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .speech-content :global(p) {
