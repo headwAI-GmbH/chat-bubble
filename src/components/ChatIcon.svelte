@@ -82,11 +82,11 @@
     }
   }
 
-  /* Larger touch target for very small screens */
+  /* Smaller touch target for very small screens */
   @media (max-width: 480px) {
     .ai-assistant-icon {
-      width: 64px;
-      height: 64px;
+      width: 48px;
+      height: 48px;
       /* Ensure minimum 44px touch target (iOS guidelines) */
       min-width: 44px;
       min-height: 44px;
