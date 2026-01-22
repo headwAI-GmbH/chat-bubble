@@ -379,8 +379,8 @@ fontSize: '14px';
 #### `disclaimerTitle`
 
 **Type:** `string` | **Default:** Translation-based (`'Terms of <strong>Service</strong>'` in English, `'Nutzungs<strong>bedingungen</strong>'` in German)  
+**Type:** `string` | **Default:** Translation-based (Terms of <strong>Service</strong> in English, Nutzungs<strong>bedingungen</strong> in German)  
 Title displayed in the initial disclaimer dialog that users must accept before using the chat. This appears when the chat is first opened and the user hasn't previously accepted the terms.
-
 **HTML Support:** ✅ This field supports HTML formatting for rich text display.
 
 ```javascript
