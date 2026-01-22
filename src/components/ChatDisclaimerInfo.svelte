@@ -14,7 +14,7 @@
     on:keydown|stopPropagation
   >
     <div class="disclaimer-info-header">
-      <h3 id="disclaimer-info-title">{@html title}</h3>
+      <h3 id="disclaimer-info-title">{@html sanitizedTitle}</h3>
       <button
         class="close-info-button"
         on:click={closeDisclaimerInfo}
@@ -31,7 +31,7 @@
       </button>
     </div>
     <div class="disclaimer-info-body">
-      <div class="message-content">{@html message}</div>
+      <div class="message-content">{@html sanitizedMessage}</div>
     </div>
   </div>
 </div>
@@ -39,10 +39,15 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { isDisclaimerInfoOpen } from '../stores.js';
+  import { sanitizeTitle, sanitizeHtml } from '../htmlSanitizer.js';
   import '../styles/message-content.css';
 
   export let title = '';
   export let message = '';
+
+  // Sanitize HTML content to prevent XSS attacks
+  $: sanitizedTitle = sanitizeTitle(title);
+  $: sanitizedMessage = sanitizeHtml(message);
 
   let dialogElement;
   let closeButtonElement;
