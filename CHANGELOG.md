@@ -2,9 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.0] - 2026-01-22
+
+### Added
+
+- Speech Bubble Hint. A subtle way to catch the user's attention.
+
 ## [8.2.0] - 2026-01-21
 
-## Added
+### Added
 
 - Capability to render html in disclaimer message and info message.
 
@@ -16,7 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [8.0.1] - 2026-01-05
 
-## Added
+### Added
 
 - Compatability with Open WebUI
 - Open source relevant files

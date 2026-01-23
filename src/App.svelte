@@ -1,10 +1,22 @@
 <main>
   <!-- Floating HeadwAI Chat Bubble Icon -->
   {#if !$isChatOpen}
-    <ChatIcon
-      faviconBackgroundColor={computedBackgroundColor}
-      iconPath={computedFaviconPath}
-    />
+    <div class="chat-icon-container">
+      {#if computedEnableSpeechBubbleHint}
+        <SpeechBubbleHint
+          message={computedSpeechBubbleHintMessage}
+          displayDuration={computedSpeechBubbleHintDuration}
+          fontSize={computedFontSize}
+          fontFamily={computedFontFamily}
+          backgroundColor={computedSpeechBubbleHintBackgroundColor}
+          textColor={computedSpeechBubbleHintTextColor}
+        />
+      {/if}
+      <ChatIcon
+        faviconBackgroundColor={computedBackgroundColor}
+        iconPath={computedFaviconPath}
+      />
+    </div>
   {/if}
 
   {#if $isChatOpen}
@@ -71,6 +83,7 @@
   import ChatContent from './components/ChatContent.svelte';
   import ChatDisclaimer from './components/ChatDisclaimer.svelte';
   import ChatDisclaimerInfo from './components/ChatDisclaimerInfo.svelte';
+  import SpeechBubbleHint from './components/SpeechBubbleHint.svelte';
   import {
     isChatOpen,
     generatedChatTitle,
@@ -106,6 +119,11 @@
   export let disclaimerMessage = undefined;
   export let infoTitle = undefined;
   export let infoMessage = undefined;
+  export let speechBubbleHintMessage = undefined;
+  export let speechBubbleHintDuration = undefined;
+  export let enableSpeechBubbleHint = undefined;
+  export let speechBubbleHintBackgroundColor = undefined;
+  export let speechBubbleHintTextColor = undefined;
 
   let deepChatRef; // Reference to the deep-chat component
 
@@ -214,6 +232,34 @@
     import.meta.env.VITE_CHAT_BUBBLE_INFO_MESSAGE ||
     $tStore('chat.info.message');
 
+  $: computedSpeechBubbleHintMessage =
+    speechBubbleHintMessage ||
+    import.meta.env.VITE_CHAT_BUBBLE_SPEECH_BUBBLE_HINT_MESSAGE ||
+    'Click here if you need <strong>help</strong>!';
+
+  const computedSpeechBubbleHintDuration =
+    parseInt(
+      speechBubbleHintDuration ||
+        import.meta.env.VITE_CHAT_BUBBLE_SPEECH_BUBBLE_HINT_DURATION,
+    ) || 4000;
+
+  const computedEnableSpeechBubbleHint =
+    enableSpeechBubbleHint !== undefined
+      ? enableSpeechBubbleHint
+      : import.meta.env.VITE_CHAT_BUBBLE_ENABLE_SPEECH_BUBBLE_HINT !== undefined
+        ? import.meta.env.VITE_CHAT_BUBBLE_ENABLE_SPEECH_BUBBLE_HINT === 'true'
+        : true;
+
+  const computedSpeechBubbleHintBackgroundColor =
+    speechBubbleHintBackgroundColor ||
+    import.meta.env.VITE_CHAT_BUBBLE_SPEECH_BUBBLE_HINT_BG_COLOR ||
+    '#ffffff';
+
+  const computedSpeechBubbleHintTextColor =
+    speechBubbleHintTextColor ||
+    import.meta.env.VITE_CHAT_BUBBLE_SPEECH_BUBBLE_HINT_TEXT_COLOR ||
+    '#333333';
+
   // Create initial history object that both ChatContent and ChatHeader can use
   $: initialHistory = [
     {
@@ -238,6 +284,36 @@
     margin: 0;
     padding: 0;
     pointer-events: none; /* Allow clicks to pass through the main container */
+  }
+
+  .chat-icon-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    z-index: 998;
+    pointer-events: auto;
+  }
+
+  /* Mobile responsive styles for chat icon container */
+  @media (max-width: 768px) {
+    .chat-icon-container {
+      width: 56px;
+      height: 56px;
+      /* Add safe area support for iPhone */
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      right: calc(16px + env(safe-area-inset-right, 0px));
+      /* Keep icon below chat window (9999) but above keyboard */
+      z-index: 9998;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .chat-icon-container {
+      width: 64px;
+      height: 64px;
+    }
   }
 
   /* Chat Container */

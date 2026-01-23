@@ -22,9 +22,7 @@
 
 <style>
   .ai-assistant-icon {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+    position: relative;
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -34,7 +32,6 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     pointer-events: auto; /* Ensure the icon is always clickable */
-    z-index: 998; /* Ensure it's above other elements but below the chat window */
     transition:
       transform 0.2s ease,
       box-shadow 0.2s ease;
@@ -61,9 +58,6 @@
     .ai-assistant-icon {
       width: 56px;
       height: 56px;
-      /* Add safe area support for iPhone */
-      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-      right: calc(16px + env(safe-area-inset-right, 0px));
       /* Better mobile touch handling */
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
@@ -74,8 +68,6 @@
       user-select: none;
       /* Improve touch responsiveness */
       -webkit-touch-callout: none;
-      /* Keep icon below chat window (9999) but above keyboard */
-      z-index: 9998;
     }
 
     /* Improve hover states for mobile (touch devices) */
@@ -90,11 +82,11 @@
     }
   }
 
-  /* Larger touch target for very small screens */
+  /* Smaller touch target for very small screens */
   @media (max-width: 480px) {
     .ai-assistant-icon {
-      width: 64px;
-      height: 64px;
+      width: 48px;
+      height: 48px;
       /* Ensure minimum 44px touch target (iOS guidelines) */
       min-width: 44px;
       min-height: 44px;
