@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.1] - 2026-02-17
+
+### Changed
+
+- Moved storage of accepted terms of service / disclaimer from local to session
+- Made terms of service / disclaimer message to be scrollable
+
 ## [8.3.0] - 2026-01-22
 
 ### Added

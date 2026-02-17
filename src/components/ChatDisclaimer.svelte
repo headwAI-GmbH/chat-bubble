@@ -110,16 +110,25 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
   }
 
   .disclaimer-content {
-    padding: 24px;
-    max-width: 350px;
+    padding: 32px 24px;
+    max-width: 550px;
+    max-height: 100%;
     text-align: left;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .disclaimer-header {
+    margin-bottom: 16px;
   }
 
   .disclaimer-header h3 {
-    margin: 0 0 16px 0;
+    margin: 0;
     font-size: calc(var(--font-size, 1em) * 1.3);
     font-family: var(--font-family, inherit);
     font-weight: 600;
@@ -128,7 +137,10 @@
   }
 
   .disclaimer-body {
-    margin-bottom: 24px;
+    overflow-y: auto;
+    padding-right: 8px;
+    flex: 1;
+    min-height: 0;
   }
 
   .disclaimer-body p {
@@ -143,6 +155,7 @@
     display: flex;
     gap: 12px;
     justify-content: center;
+    margin-top: 24px;
   }
 
   .decline-button,

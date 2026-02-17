@@ -22,14 +22,22 @@ export const generatedChatTitle = writable(null);
 
 export const isChatOpen = writable(false);
 
-// Create a persistent store for disclaimer acceptance
+// Create a session store for disclaimer acceptance
 function createDisclaimerStore() {
   const STORAGE_KEY = 'headwai-chat-disclaimer-accepted';
 
-  // Check localStorage for existing value, default to false
-  const stored =
-    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-  const initial = stored === 'true';
+  // Check sessionStorage for existing value, default to false
+  let initial = false;
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      initial = stored === 'true';
+    }
+  } catch (e) {
+    // sessionStorage unavailable (privacy mode, blocked storage, etc.)
+    // Fall back to in-memory default
+    initial = false;
+  }
 
   const { subscribe, set } = writable(initial);
 
@@ -37,14 +45,22 @@ function createDisclaimerStore() {
     subscribe,
     accept: () => {
       set(true);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, 'true');
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem(STORAGE_KEY, 'true');
+        }
+      } catch (e) {
+        // sessionStorage unavailable, continue with in-memory state only
       }
     },
     reset: () => {
       set(false);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(STORAGE_KEY);
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (e) {
+        // sessionStorage unavailable, continue with in-memory state only
       }
     },
   };
