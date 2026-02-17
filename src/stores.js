@@ -22,13 +22,13 @@ export const generatedChatTitle = writable(null);
 
 export const isChatOpen = writable(false);
 
-// Create a persistent store for disclaimer acceptance
+// Create a session store for disclaimer acceptance
 function createDisclaimerStore() {
   const STORAGE_KEY = 'headwai-chat-disclaimer-accepted';
 
-  // Check localStorage for existing value, default to false
+  // Check sessionStorage for existing value, default to false
   const stored =
-    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+    typeof window !== 'undefined' ? sessionStorage.getItem(STORAGE_KEY) : null;
   const initial = stored === 'true';
 
   const { subscribe, set } = writable(initial);
@@ -38,13 +38,13 @@ function createDisclaimerStore() {
     accept: () => {
       set(true);
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, 'true');
+        sessionStorage.setItem(STORAGE_KEY, 'true');
       }
     },
     reset: () => {
       set(false);
       if (typeof window !== 'undefined') {
-        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
       }
     },
   };
