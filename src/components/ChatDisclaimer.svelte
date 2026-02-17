@@ -114,7 +114,7 @@
 
   .disclaimer-content {
     padding: 24px;
-    max-width: 450px;
+    max-width: 550px;
     text-align: left;
   }
 
@@ -129,7 +129,7 @@
 
   .disclaimer-body {
     margin-bottom: 24px;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     padding-right: 8px;
   }
