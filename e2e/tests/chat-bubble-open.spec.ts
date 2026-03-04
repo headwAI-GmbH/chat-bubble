@@ -6,7 +6,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('Chat Bubble Basic Test', () => {
-  test('should open chat bubble successfully', async ({ page }) => {
+  test('Chat bubble creates new chat and responds successfully', async ({
+    page,
+  }) => {
     // Navigate to the test page
     await page.goto('');
 
@@ -32,5 +34,9 @@ test.describe('Chat Bubble Basic Test', () => {
       .fill('What is the first name of Mozart?');
 
     await page.locator('#input').getByRole('button').click();
+
+    await expect(
+      page.locator('.feedback-icon > svg > path').first(),
+    ).toBeVisible();
   });
 });

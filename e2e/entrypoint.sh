@@ -18,6 +18,7 @@ cat > /app/dist-widget/test.html << HTMLEOF
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Bubble Test</title>
+    <link rel="stylesheet" href="/chat-bubble.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
         .test-info { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }

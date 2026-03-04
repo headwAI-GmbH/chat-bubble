@@ -5,10 +5,6 @@ services:
     platform: linux/amd64
     ports:
       - '8086:8000'
-    environment:
-      LLMOCK_STRATEGY: 'mirror'
-      LLMOCK_MODEL: 'gpt-4'
-      LLMOCK_DELAY: '100'
 
   # Backend service (to be overridden by specific backend configs)
   backend:
@@ -21,7 +17,7 @@ services:
       CORS_ALLOW_ORIGIN: http://localhost:5174
       ENABLE_OLLAMA_API: 'false'
       ENABLE_OPENAI_API: 'true'
-      OPENAI_API_KEY: 'test-api-key'
+      OPENAI_API_KEY: 'your-secret-api-key'
       OPENAI_API_BASE_URL: 'http://mock-llm:8000/v1'
       ENABLE_SIGNUP: 'true'
       DEFAULT_USER_ROLE: 'user'
@@ -57,9 +53,6 @@ services:
       VITE_CHAT_BUBBLE_INITIAL_MESSAGE: 'Hello! How can I help you today?'
       VITE_CHAT_BUBBLE_CHAT_TITLE: 'Test Admin Assistant'
       VITE_CHAT_BUBBLE_LOCALE: 'en'
-    volumes:
-      - ../:/app
-      - /app/node_modules
     depends_on:
       backend:
         condition: service_started
