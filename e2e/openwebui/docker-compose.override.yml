@@ -1,0 +1,40 @@
+services:
+  # Open WebUI Backend Configuration
+  backend:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui-backend-e2e
+    ports:
+      - '8080:8080'
+    environment:
+      # Open WebUI specific settings
+      WEBUI_SECRET_KEY: 'test-secret-key-openwebui-e2e'
+      WEBUI_AUTH: 'true'
+      ENABLE_IMAGE_GENERATION: 'false'
+      ENABLE_RAG_HYBRID_SEARCH: 'false'
+
+      # Server Configuration
+      PORT: '8080'
+
+      # CORS for different port
+      CORS_ALLOW_ORIGIN: 'http://localhost:5174'
+      WEBUI_URL: 'http://localhost:8080'
+    volumes:
+      - openwebui-data:/app/backend/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+
+  # Chat Bubble with Open WebUI configuration
+  chat-bubble-dev:
+    environment:
+      VITE_CHAT_BUBBLE_API_URL: 'http://localhost:8080'
+      VITE_CHAT_BUBBLE_API_KEY: 'test-api-key'
+      VITE_CHAT_BUBBLE_CHAT_TITLE: 'Open WebUI Assistant'
+
+  # Mock LLM on different port to avoid conflicts
+  mock-llm:
+    ports:
+      - '8087:8000'
+
+volumes:
+  openwebui-data:
+    driver: local

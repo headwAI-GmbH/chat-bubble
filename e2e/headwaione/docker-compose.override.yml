@@ -1,0 +1,35 @@
+services:
+  # HeadwAI ONE Backend Configuration
+  backend:
+    image: ghcr.io/headwai-gmbh/headwai-open-webui:merge-owui-v0.8.2
+    platform: linux/amd64
+    container_name: headwaione-backend-e2e
+    environment:
+      # HeadwAI ONE specific settings
+      ENABLE_SHARE_WITH_USERS: 'true'
+      ENABLE_ADMIN_EXPORT: 'false'
+      SIGNIN_RATE_LIMIT: '0'
+      ENABLE_EVALUATION_ARENA_MODELS: 'false'
+      USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS: 'true'
+      USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS: 'true'
+      USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS: 'true'
+
+      # Server Configuration
+      WEBUI_URL: 'http://localhost:8085'
+
+      # Development/Testing Settings
+      ENABLE_SIGNUP: 'true'
+      DEFAULT_USER_ROLE: 'user'
+    volumes:
+      - headwaione-data:/app/backend/data
+
+  # Chat Bubble with HeadwAI ONE configuration
+  chat-bubble-dev:
+    environment:
+      VITE_CHAT_BUBBLE_API_URL: 'http://localhost:8085'
+      VITE_CHAT_BUBBLE_CHAT_TITLE: 'HeadwAI Assistant'
+      # HeadwAI ONE uses Origin header authentication instead of API key
+
+volumes:
+  headwaione-data:
+    driver: local

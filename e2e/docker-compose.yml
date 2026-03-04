@@ -1,0 +1,80 @@
+services:
+  # Mock LLM Service (shared by both backends)
+  mock-llm:
+    image: ghcr.io/modai-systems/llmock:latest
+    platform: linux/amd64
+    ports:
+      - '8086:8000'
+    environment:
+      LLMOCK_STRATEGY: 'mirror'
+      LLMOCK_MODEL: 'gpt-4'
+      LLMOCK_DELAY: '100'
+
+  # Backend service (to be overridden by specific backend configs)
+  backend:
+    image: ghcr.io/open-webui/open-webui:main # Default image, will be overridden
+    container_name: backend-e2e
+    ports:
+      - '8085:8085'
+    environment:
+      # Common environment variables
+      CORS_ALLOW_ORIGIN: http://localhost:5174
+      ENABLE_OLLAMA_API: 'false'
+      ENABLE_OPENAI_API: 'true'
+      OPENAI_API_KEY: 'test-api-key'
+      OPENAI_API_BASE_URL: 'http://mock-llm:8000/v1'
+      ENABLE_SIGNUP: 'true'
+      DEFAULT_USER_ROLE: 'user'
+      LOG_LEVEL: 'DEBUG'
+      HOST: '0.0.0.0'
+      PORT: '8085'
+    volumes:
+      - ./prepare-db-for-test.sh:/app/prepare-db-for-test.sh:ro
+    depends_on:
+      mock-llm:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Chat Bubble Widget Development Server
+  chat-bubble-dev:
+    build:
+      context: ..
+      dockerfile: e2e/Dockerfile.chat-bubble
+    container_name: chat-bubble-dev-e2e
+    ports:
+      - '5174:5174'
+    environment:
+      # Default environment variables (can be overridden)
+      VITE_CHAT_BUBBLE_API_URL: 'http://localhost:8085'
+      VITE_CHAT_BUBBLE_ASSISTANT_ID: 'test-admin-assistant'
+      VITE_CHAT_BUBBLE_MAX_MESSAGES: '50'
+      VITE_CHAT_BUBBLE_PLACEHOLDER_TEXT: 'Type your message...'
+      VITE_CHAT_BUBBLE_INITIAL_MESSAGE: 'Hello! How can I help you today?'
+      VITE_CHAT_BUBBLE_CHAT_TITLE: 'Test Admin Assistant'
+      VITE_CHAT_BUBBLE_LOCALE: 'en'
+    volumes:
+      - ../:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_started
+
+  # Database cleanup service
+  cleanup:
+    image: busybox
+    command: rm -rf /app/backend/data/* || true
+    volumes:
+      - backend-data:/app/backend/data
+
+volumes:
+  backend-data:
+    driver: local
+
+networks:
+  default:
+    name: chat-bubble-e2e-network

@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Test results
+openwebui/test-results/
+openwebui/playwright-report/
+headwaione/test-results/
+headwaione/playwright-report/
+playwright/.cache/
+
+# Logs
+*.log

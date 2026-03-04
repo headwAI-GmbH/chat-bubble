@@ -1,0 +1,27 @@
+# Dockerfile for serving the Chat Bubble widget during E2E tests
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build the chat bubble widget
+RUN npm run build
+
+# Install a simple HTTP server
+RUN npm install -g http-server
+
+# Copy entrypoint script that generates test.html dynamically at startup
+COPY e2e/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Expose port 5174
+EXPOSE 5174
+
+# Generate test.html at startup (with optional api-key) then serve
+CMD ["/entrypoint.sh"]

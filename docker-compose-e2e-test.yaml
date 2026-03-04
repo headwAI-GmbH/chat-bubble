@@ -1,0 +1,47 @@
+services:
+  backend:
+    build: .
+    container_name: headwai-open-webui-e2e
+    ports:
+      - '8085:8085'
+    environment:
+      CORS_ALLOW_ORIGIN: http://localhost:8087
+      ENABLE_OLLAMA_API: 'False'
+      ENABLE_OPENAI_API: 'True'
+      OPENAI_API_KEY: your-secret-api-key
+      OPENAI_API_BASE_URL: http://mock-llm:8000/v1
+      ENABLE_SHARE_WITH_USERS: 'true'
+      ENABLE_ADMIN_EXPORT: 'false'
+      SIGNIN_RATE_LIMIT: '0'
+      ENABLE_EVALUATION_ARENA_MODELS: false
+      USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS: true
+      USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS: true
+      USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS: true
+      WEBUI_URL: http://localhost:8087/foobar
+      PORT: '8085'
+    volumes:
+      - ./e2e/prepare-db-for-test.sh:/app/prepare-db-for-test.sh:ro
+    depends_on:
+      - mock-llm
+      - cleanup
+
+  mock-llm:
+    image: ghcr.io/modai-systems/llmock:latest
+    ports:
+      - '8086:8000'
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: headwai-caddy-proxy
+    ports:
+      - '8087:80'
+    volumes:
+      - ./e2e/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - backend
+
+  cleanup:
+    image: busybox
+    command: rm -rf /app/backend/data/* || true
+    volumes:
+      - ./e2e/data:/app/backend/data
