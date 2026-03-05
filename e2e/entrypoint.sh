@@ -30,7 +30,7 @@ cat > /app/dist-widget/test.html << HTMLEOF
         <p>This page is used for testing the chat bubble widget.</p>
     </div>
     <div id="chat-bubble-container" data-chat-bubble data-chat-bubble-api-url="${API_URL}" data-chat-bubble-assistant-id="${ASSISTANT_ID}"${API_KEY_ATTR}></div>
-    <script src="/chat-bubble.js"></script>
+    <script type="module" src="/chat-bubble.js"></script>
 </body>
 </html>
 HTMLEOF

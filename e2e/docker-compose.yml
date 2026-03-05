@@ -24,6 +24,13 @@ services:
       LOG_LEVEL: 'DEBUG'
       HOST: '0.0.0.0'
       PORT: '8085'
+      # Server Configuration
+      WEBUI_URL: 'http://localhost:8085'
+      ##
+      ENABLE_EVALUATION_ARENA_MODELS: 'false'
+      USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS: 'true'
+      USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS: 'true'
+      USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS: 'true'
     volumes:
       - ./prepare-db-for-test.sh:/app/prepare-db-for-test.sh:ro
     depends_on:
