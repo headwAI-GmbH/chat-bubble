@@ -5,7 +5,7 @@ on:
     branches: [main, develop]
     paths:
       - 'src/**'
-      - 'e2e/widget-tests/**'
+      - 'e2e/**'
       - 'package.json'
       - 'vite.config.js'
       - '.github/workflows/widget-e2e-tests.yml'
@@ -13,7 +13,7 @@ on:
     branches: [main, develop]
     paths:
       - 'src/**'
-      - 'e2e/widget-tests/**'
+      - 'e2e/**'
       - 'package.json'
       - 'vite.config.js'
   workflow_dispatch:
@@ -47,37 +47,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Build chat bubble widget
-        run: npm run build
-
       - name: Install E2E test dependencies
-        working-directory: e2e/widget-tests
+        working-directory: e2e
         run: npm install
 
       - name: Install Playwright browsers
-        working-directory: e2e/widget-tests
-        run: npx playwright install chromium
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
 
-      - name: Start HeadwAI ONE backend with Docker Compose
-        working-directory: e2e/widget-tests
+      - name: Start Docker services for HeadwAI ONE
+        working-directory: e2e
         run: |
-          # Pull required images
-          docker compose -f docker/docker-compose.yml --profile headwaione pull
+          docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build -d
 
-          # Start services in background
-          docker compose -f docker/docker-compose.yml --profile headwaione up -d
-
-          # Wait for services to be healthy
+          # Wait for backend to be healthy
           timeout=300
           while [ $timeout -gt 0 ]; do
-            if docker compose -f docker/docker-compose.yml ps --services --filter "status=running" | grep -q "headwaione-backend"; then
-              if curl -f http://localhost:8085/health >/dev/null 2>&1; then
-                echo "HeadwAI ONE backend is ready"
-                break
-              fi
+            if curl -sf http://localhost:8085/health >/dev/null 2>&1; then
+              echo "HeadwAI ONE backend is ready"
+              break
             fi
             echo "Waiting for HeadwAI ONE backend... ($timeout seconds remaining)"
             sleep 5
@@ -86,40 +74,43 @@ jobs:
 
           if [ $timeout -le 0 ]; then
             echo "HeadwAI ONE backend failed to start"
-            docker compose -f docker/docker-compose.yml logs
+            docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs
             exit 1
           fi
 
-      - name: Wait for Chat Bubble dev server
-        working-directory: e2e/widget-tests
-        run: |
+          # Wait for chat bubble widget server
           timeout=120
           while [ $timeout -gt 0 ]; do
-            if curl -f http://localhost:5174 >/dev/null 2>&1; then
-              echo "Chat Bubble dev server is ready"
+            if curl -sf http://localhost:5174 >/dev/null 2>&1; then
+              echo "Chat Bubble server is ready"
               break
             fi
-            echo "Waiting for Chat Bubble dev server... ($timeout seconds remaining)"
+            echo "Waiting for Chat Bubble server... ($timeout seconds remaining)"
             sleep 2
             timeout=$((timeout - 2))
           done
 
           if [ $timeout -le 0 ]; then
-            echo "Chat Bubble dev server failed to start"
-            docker compose -f docker/docker-compose.yml logs chat-bubble-dev
+            echo "Chat Bubble server failed to start"
+            docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs chat-bubble-dev
             exit 1
           fi
 
       - name: Run Playwright tests with HeadwAI ONE
-        working-directory: e2e/widget-tests
-        run: npx playwright test --project=headwaione
+        working-directory: e2e
+        run: E2E_CONTAINER_NAME=headwaione-backend-e2e npx playwright test --config=playwright.headwaione.config.ts
         env:
-          PLAYWRIGHT_PROJECT: headwaione
+          CI: true
+
+      - name: Docker logs on failure
+        working-directory: e2e
+        if: failure()
+        run: docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs
 
       - name: Stop Docker services
-        working-directory: e2e/widget-tests
+        working-directory: e2e
         if: always()
-        run: docker compose -f docker/docker-compose.yml down -v
+        run: docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml down -v
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -127,8 +118,8 @@ jobs:
         with:
           name: headwaione-test-results
           path: |
-            e2e/widget-tests/test-results/
-            e2e/widget-tests/playwright-report/
+            e2e/headwaione/test-results/
+            e2e/headwaione/playwright-report/
           retention-days: 7
 
   test-openwebui:
@@ -146,37 +137,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Build chat bubble widget
-        run: npm run build
-
       - name: Install E2E test dependencies
-        working-directory: e2e/widget-tests
+        working-directory: e2e
         run: npm install
 
       - name: Install Playwright browsers
-        working-directory: e2e/widget-tests
-        run: npx playwright install chromium
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
 
-      - name: Start Open WebUI backend with Docker Compose
-        working-directory: e2e/widget-tests
+      - name: Start Docker services for Open WebUI
+        working-directory: e2e
         run: |
-          # Pull required images
-          docker compose -f docker/docker-compose.yml --profile openwebui pull
+          docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml up --build -d
 
-          # Start services in background
-          docker compose -f docker/docker-compose.yml --profile openwebui up -d
-
-          # Wait for services to be healthy
+          # Wait for backend to be healthy
           timeout=300
           while [ $timeout -gt 0 ]; do
-            if docker compose -f docker/docker-compose.yml ps --services --filter "status=running" | grep -q "openwebui-backend"; then
-              if curl -f http://localhost:8080/health >/dev/null 2>&1; then
-                echo "Open WebUI backend is ready"
-                break
-              fi
+            if curl -sf http://localhost:8085/health >/dev/null 2>&1; then
+              echo "Open WebUI backend is ready"
+              break
             fi
             echo "Waiting for Open WebUI backend... ($timeout seconds remaining)"
             sleep 5
@@ -185,40 +164,43 @@ jobs:
 
           if [ $timeout -le 0 ]; then
             echo "Open WebUI backend failed to start"
-            docker compose -f docker/docker-compose.yml logs
+            docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs
             exit 1
           fi
 
-      - name: Wait for Chat Bubble dev server
-        working-directory: e2e/widget-tests
-        run: |
+          # Wait for chat bubble widget server
           timeout=120
           while [ $timeout -gt 0 ]; do
-            if curl -f http://localhost:5174 >/dev/null 2>&1; then
-              echo "Chat Bubble dev server is ready"
+            if curl -sf http://localhost:5174 >/dev/null 2>&1; then
+              echo "Chat Bubble server is ready"
               break
             fi
-            echo "Waiting for Chat Bubble dev server... ($timeout seconds remaining)"
+            echo "Waiting for Chat Bubble server... ($timeout seconds remaining)"
             sleep 2
             timeout=$((timeout - 2))
           done
 
           if [ $timeout -le 0 ]; then
-            echo "Chat Bubble dev server failed to start"
-            docker compose -f docker/docker-compose.yml logs chat-bubble-dev
+            echo "Chat Bubble server failed to start"
+            docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs chat-bubble-dev
             exit 1
           fi
 
       - name: Run Playwright tests with Open WebUI
-        working-directory: e2e/widget-tests
-        run: npx playwright test --project=openwebui
+        working-directory: e2e
+        run: E2E_CONTAINER_NAME=openwebui-backend-e2e npx playwright test --config=playwright.openwebui.config.ts
         env:
-          PLAYWRIGHT_PROJECT: openwebui
+          CI: true
+
+      - name: Docker logs on failure
+        working-directory: e2e
+        if: failure()
+        run: docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs
 
       - name: Stop Docker services
-        working-directory: e2e/widget-tests
+        working-directory: e2e
         if: always()
-        run: docker compose -f docker/docker-compose.yml down -v
+        run: docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml down -v
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -226,8 +208,8 @@ jobs:
         with:
           name: openwebui-test-results
           path: |
-            e2e/widget-tests/test-results/
-            e2e/widget-tests/playwright-report/
+            e2e/openwebui/test-results/
+            e2e/openwebui/playwright-report/
           retention-days: 7
 
   test-summary:

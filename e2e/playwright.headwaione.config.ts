@@ -26,7 +26,7 @@ export default defineConfig({
       'docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml down && docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build',
     cwd: __dirname,
     url: 'http://localhost:5174',
-    reuseExistingServer: false,
+    reuseExistingServer: !!process.env.CI,
     timeout: 300 * 1000, // 5 minutes
   },
 
