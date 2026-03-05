@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.2] - 2026-03-05
+
+### Added
+
+- e2e playwright tests for HeadwAI ONE and Open WebUI
+
 ## [8.3.1] - 2026-02-17
 
 ### Changed
