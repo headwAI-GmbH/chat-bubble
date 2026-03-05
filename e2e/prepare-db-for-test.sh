@@ -58,7 +58,7 @@ DELETE FROM prompt;
 DELETE FROM access_grant;
 DELETE FROM config;
 DELETE FROM api_key;
--- Don't delete KNOWLEGE and FILE here as they will be cleaned via rest to also clean the actual vectorDB (else we would get duplicate errors on re-runs)
+-- Don't delete KNOWLEDGE and FILE here as they will be cleaned via rest to also clean the actual vectorDB (else we would get duplicate errors on re-runs)
 
 -- Insert test users with explicit column names to ensure correct mapping
 INSERT INTO user (id, email, username, role, name, profile_image_url, profile_banner_image_url, bio, gender, date_of_birth, timezone, presence_state, status_emoji, status_message, status_expires_at, info, settings, oauth, scim, last_active_at, updated_at, created_at) 
