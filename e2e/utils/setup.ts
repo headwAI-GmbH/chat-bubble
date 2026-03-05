@@ -25,7 +25,7 @@ export async function prepareDatabase() {
         'Database preparation script not found in container, skipping database preparation',
       );
       console.log(
-        'This is expected for kinoel tests which use production-like data setup',
+        'This is expected when the backend image does not include /app/prepare-db-for-test.sh (for example, when using a production-like data setup)',
       );
       return;
     }
