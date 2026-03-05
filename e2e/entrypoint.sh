@@ -35,4 +35,4 @@ cat > /app/dist-widget/test.html << HTMLEOF
 </html>
 HTMLEOF
 
-exec http-server dist-widget -p 5174 --cors -o
+exec http-server dist-widget -p 5174 --cors
