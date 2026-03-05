@@ -215,6 +215,17 @@ test('Download button works', async ({ page }) => {
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download chat history' }).click();
   const download = await downloadPromise;
+
+  // Basic assertions about the downloaded file
+  const suggestedFilename = download.suggestedFilename();
+  await expect(suggestedFilename).toBeTruthy();
+
+  const stream = await download.createReadStream();
+  let totalBytes = 0;
+  for await (const chunk of stream) {
+    totalBytes += chunk.length;
+  }
+  await expect(totalBytes).toBeGreaterThan(0);
 });
 
 test('Closing chat bubble keeps conversation', async ({ page }) => {
