@@ -72,11 +72,11 @@ npm run docker:openwebui:down
 
 The base `docker-compose.yml` defines three shared services:
 
-| Service | Description | Port |
-|---|---|---|
-| `mock-llm` | [llmock](https://github.com/modAI-systems/llmock) — OpenAI-compatible mock | 8086 |
-| `backend` | Open WebUI / HeadwAI ONE (overridden per backend) | 8085 |
-| `chat-bubble-dev` | Built widget served via http-server | 5174 |
+| Service           | Description                                                                | Port |
+| ----------------- | -------------------------------------------------------------------------- | ---- |
+| `mock-llm`        | [llmock](https://github.com/modAI-systems/llmock) — OpenAI-compatible mock | 8086 |
+| `backend`         | Open WebUI / HeadwAI ONE (overridden per backend)                          | 8085 |
+| `chat-bubble-dev` | Built widget served via http-server                                        | 5174 |
 
 Each backend has a `docker-compose.override.yml` that swaps the backend image and sets backend-specific environment variables (e.g. API key for Open WebUI, Origin-based auth for HeadwAI ONE).
 

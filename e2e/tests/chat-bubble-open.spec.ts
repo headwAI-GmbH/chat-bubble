@@ -1,82 +1,73 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { prepareDatabase } from '../utils/setup';
+
+// ---------------------------------------------------------------------------
+// Helpers – centralise repeated UI interactions so selector/text changes only
+// need updating in one place.
+// ---------------------------------------------------------------------------
+
+/** Navigate to the app and wait until the page is idle. */
+async function navigateToApp(page: Page) {
+  await page.goto('');
+  await page.waitForLoadState('networkidle');
+}
+
+/** Wait for the floating chat icon and click it to open the chat window. */
+async function openChatBubble(page: Page) {
+  const chatIcon = page.locator('.chat-icon-container');
+  await expect(chatIcon).toBeVisible({ timeout: 10000 });
+  await chatIcon.click();
+}
+
+/** Accept the disclaimer / terms dialog. */
+async function acceptTerms(page: Page) {
+  await page.getByRole('button', { name: 'Accept terms' }).click();
+}
+
+/** Type a message into the input field and press the send button. */
+async function sendMessage(page: Page, message: string) {
+  const input = page.getByRole('textbox', {
+    name: 'Enter your questions here',
+  });
+  await input.click();
+  await input.fill(message);
+  await page.locator('#input').getByRole('button').click();
+}
+
+/** Shortcut that opens the chat, accepts terms, and sends a message. */
+async function openAndSendMessage(page: Page, message: string) {
+  await navigateToApp(page);
+  await openChatBubble(page);
+  await acceptTerms(page);
+  await sendMessage(page, message);
+}
+
+/** Wait until the feedback icons are visible (indicates the response arrived). */
+async function waitForResponse(page: Page) {
+  await expect(
+    page.locator('.feedback-icon > svg > path').first(),
+  ).toBeVisible();
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 test.beforeEach(async ({ page }) => {
   await prepareDatabase();
 });
 
 test('Creates initial new and responds successfully', async ({ page }) => {
-  // Navigate to the test page
-  await page.goto('');
-
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
-
-  // Wait for the chat bubble icon to be visible
-  const chatIcon = page.locator('.chat-icon-container');
-  await expect(chatIcon).toBeVisible({ timeout: 10000 });
-
-  // Click the chat bubble to open it
-  await chatIcon.click();
-
-  console.log('✅ Chat bubble opened successfully with Open WebUI backend');
-
-  await page.getByRole('button', { name: 'Accept terms' }).click();
-
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .fill('What is the first name of Mozart?');
-
-  await page.locator('#input').getByRole('button').click();
-
-  await expect(
-    page.locator('.feedback-icon > svg > path').first(),
-  ).toBeVisible();
+  await openAndSendMessage(page, 'What is the first name of Mozart?');
+  await waitForResponse(page);
 });
 
 test('Create new chat with button', async ({ page }) => {
-  // Navigate to the test page
-  await page.goto('');
-
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
-
-  // Wait for the chat bubble icon to be visible
-  const chatIcon = page.locator('.chat-icon-container');
-  await expect(chatIcon).toBeVisible({ timeout: 10000 });
-
-  // Click the chat bubble to open it
-  await chatIcon.click();
-
-  console.log('✅ Chat bubble opened successfully with Open WebUI backend');
-
-  await page.getByRole('button', { name: 'Accept terms' }).click();
-
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .fill('What is the first name of Mozart?');
-
-  await page.locator('#input').getByRole('button').click();
-
-  await expect(
-    page.locator('.feedback-icon > svg > path').first(),
-  ).toBeVisible();
+  await openAndSendMessage(page, 'What is the first name of Mozart?');
+  await waitForResponse(page);
 
   await page.getByRole('button', { name: 'Start new chat' }).click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .fill('Another question');
-
-  await page.locator('#input').getByRole('button').click();
+  await sendMessage(page, 'Another question');
 
   await expect(page.locator('#messages')).toMatchAriaSnapshot(`
     - paragraph: Hey, how can I help you?
@@ -86,31 +77,7 @@ test('Create new chat with button', async ({ page }) => {
 });
 
 test('Feedback works for response', async ({ page }) => {
-  // Navigate to the test page
-  await page.goto('');
-
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
-
-  // Wait for the chat bubble icon to be visible
-  const chatIcon = page.locator('.chat-icon-container');
-  await expect(chatIcon).toBeVisible({ timeout: 10000 });
-
-  // Click the chat bubble to open it
-  await chatIcon.click();
-
-  console.log('✅ Chat bubble opened successfully with Open WebUI backend');
-
-  await page.getByRole('button', { name: 'Accept terms' }).click();
-
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .fill('What is the first name of Mozart?');
-
-  await page.locator('#input').getByRole('button').click();
+  await openAndSendMessage(page, 'What is the first name of Mozart?');
 
   // Click thumbs-up and verify the feedback API call succeeds
   const goodFeedbackResponse = page.waitForResponse(
@@ -133,22 +100,9 @@ test('Feedback works for response', async ({ page }) => {
 });
 
 test('Information button shows information', async ({ page }) => {
-  // Navigate to the test page
-  await page.goto('');
-
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
-
-  // Wait for the chat bubble icon to be visible
-  const chatIcon = page.locator('.chat-icon-container');
-  await expect(chatIcon).toBeVisible({ timeout: 10000 });
-
-  // Click the chat bubble to open it
-  await chatIcon.click();
-
-  console.log('✅ Chat bubble opened successfully with Open WebUI backend');
-
-  await page.getByRole('button', { name: 'Accept terms' }).click();
+  await navigateToApp(page);
+  await openChatBubble(page);
+  await acceptTerms(page);
 
   await page.getByRole('button', { name: 'Show information' }).click();
 
@@ -180,31 +134,7 @@ test('Information button shows information', async ({ page }) => {
 });
 
 test('Download button works', async ({ page }) => {
-  // Navigate to the test page
-  await page.goto('');
-
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
-
-  // Wait for the chat bubble icon to be visible
-  const chatIcon = page.locator('.chat-icon-container');
-  await expect(chatIcon).toBeVisible({ timeout: 10000 });
-
-  // Click the chat bubble to open it
-  await chatIcon.click();
-
-  console.log('✅ Chat bubble opened successfully with Open WebUI backend');
-
-  await page.getByRole('button', { name: 'Accept terms' }).click();
-
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .fill('Another question');
-
-  await page.locator('#input').getByRole('button').click();
+  await openAndSendMessage(page, 'Another question');
 
   await expect(page.locator('#messages')).toMatchAriaSnapshot(`
     - paragraph: Hey, how can I help you?
@@ -229,31 +159,7 @@ test('Download button works', async ({ page }) => {
 });
 
 test('Closing chat bubble keeps conversation', async ({ page }) => {
-  // Navigate to the test page
-  await page.goto('');
-
-  // Wait for the page to load
-  await page.waitForLoadState('networkidle');
-
-  // Wait for the chat bubble icon to be visible
-  const chatIcon = page.locator('.chat-icon-container');
-  await expect(chatIcon).toBeVisible({ timeout: 10000 });
-
-  // Click the chat bubble to open it
-  await chatIcon.click();
-
-  console.log('✅ Chat bubble opened successfully with Open WebUI backend');
-
-  await page.getByRole('button', { name: 'Accept terms' }).click();
-
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .click();
-  await page
-    .getByRole('textbox', { name: 'Enter your questions here' })
-    .fill('Another question');
-
-  await page.locator('#input').getByRole('button').click();
+  await openAndSendMessage(page, 'Another question');
 
   await expect(page.locator('#messages')).toMatchAriaSnapshot(`
     - paragraph: Hey, how can I help you?
