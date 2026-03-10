@@ -6,7 +6,7 @@ services:
     ports:
       - '8086:8000'
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/v1/models']
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8000/v1/models']
       interval: 5s
       timeout: 5s
       retries: 5
