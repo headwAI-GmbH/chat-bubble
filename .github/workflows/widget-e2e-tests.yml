@@ -55,6 +55,13 @@ jobs:
         working-directory: e2e
         run: npx playwright install --with-deps chromium
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
       - name: Start Docker services for HeadwAI ONE
         working-directory: e2e
         run: |
@@ -144,6 +151,13 @@ jobs:
       - name: Install Playwright browsers
         working-directory: e2e
         run: npx playwright install --with-deps chromium firefox
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Start Docker services for Open WebUI
         working-directory: e2e

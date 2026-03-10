@@ -1,7 +1,7 @@
 services:
   # HeadwAI ONE Backend Configuration
   backend:
-    image: ghcr.io/headwai-gmbh/headwai-open-webui:merge-owui-v0.8.2
+    image: ghcr.io/headwai-gmbh/headwai-open-webui:main
     platform: linux/amd64
     container_name: headwaione-backend-e2e
     environment:
