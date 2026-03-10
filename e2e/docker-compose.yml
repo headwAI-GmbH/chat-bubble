@@ -5,6 +5,12 @@ services:
     platform: linux/amd64
     ports:
       - '8086:8000'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/v1/models']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # Backend service (to be overridden by specific backend configs)
   backend:
@@ -35,7 +41,7 @@ services:
       - ./prepare-db-for-test.sh:/app/prepare-db-for-test.sh:ro
     depends_on:
       mock-llm:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
       interval: 10s
