@@ -6,7 +6,7 @@ services:
     ports:
       - '8086:8000'
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8000/v1/models']
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/models']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,7 +24,7 @@ services:
       ENABLE_OLLAMA_API: 'false'
       ENABLE_OPENAI_API: 'true'
       OPENAI_API_KEY: 'your-secret-api-key'
-      OPENAI_API_BASE_URL: 'http://mock-llm:8000/v1'
+      OPENAI_API_BASE_URL: 'http://mock-llm:8000/'
       ENABLE_SIGNUP: 'true'
       DEFAULT_USER_ROLE: 'user'
       LOG_LEVEL: 'DEBUG'
