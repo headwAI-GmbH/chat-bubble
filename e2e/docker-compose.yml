@@ -6,7 +6,7 @@ services:
     ports:
       - '8086:8000'
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/models']
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '8000']
       interval: 5s
       timeout: 5s
       retries: 5
