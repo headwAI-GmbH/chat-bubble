@@ -6,11 +6,15 @@ services:
     ports:
       - '8086:8000'
     healthcheck:
-      test: ['CMD', 'nc', '-z', '127.0.0.1', '8000']
+      test:
+        [
+          'CMD-SHELL',
+          'curl -sf http://127.0.0.1:8000/ > /dev/null 2>&1 || wget -q --spider http://127.0.0.1:8000/ > /dev/null 2>&1 || nc -z 127.0.0.1 8000',
+        ]
       interval: 5s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 12
+      start_period: 15s
 
   # Backend service (to be overridden by specific backend configs)
   backend:

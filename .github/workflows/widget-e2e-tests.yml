@@ -67,6 +67,24 @@ jobs:
         run: |
           docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build -d
 
+          # Wait for mock-llm to be healthy
+          timeout=120
+          while [ $timeout -gt 0 ]; do
+            if docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml ps mock-llm | grep -q "(healthy)"; then
+              echo "Mock LLM service is healthy"
+              break
+            fi
+            echo "Waiting for Mock LLM service... ($timeout seconds remaining)"
+            sleep 5
+            timeout=$((timeout - 5))
+          done
+
+          if [ $timeout -le 0 ]; then
+            echo "Mock LLM service failed to become healthy"
+            docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs mock-llm
+            exit 1
+          fi
+
           # Wait for backend to be healthy
           timeout=300
           while [ $timeout -gt 0 ]; do
@@ -163,6 +181,24 @@ jobs:
         working-directory: e2e
         run: |
           docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml up --build -d
+
+          # Wait for mock-llm to be healthy
+          timeout=120
+          while [ $timeout -gt 0 ]; do
+            if docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml ps mock-llm | grep -q "(healthy)"; then
+              echo "Mock LLM service is healthy"
+              break
+            fi
+            echo "Waiting for Mock LLM service... ($timeout seconds remaining)"
+            sleep 5
+            timeout=$((timeout - 5))
+          done
+
+          if [ $timeout -le 0 ]; then
+            echo "Mock LLM service failed to become healthy"
+            docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs mock-llm
+            exit 1
+          fi
 
           # Wait for backend to be healthy
           timeout=300
