@@ -9,7 +9,7 @@ services:
       ENABLE_OLLAMA_API: 'False'
       ENABLE_OPENAI_API: 'True'
       OPENAI_API_KEY: your-secret-api-key
-      OPENAI_API_BASE_URL: http://mock-llm:8000/v1
+      OPENAI_API_BASE_URL: http://mock-llm:8086/v1
       ENABLE_SHARE_WITH_USERS: 'true'
       ENABLE_ADMIN_EXPORT: 'false'
       SIGNIN_RATE_LIMIT: '0'
