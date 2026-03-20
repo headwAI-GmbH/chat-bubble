@@ -134,6 +134,32 @@ fi
 
 echo "Database verified successfully"
 
+# Log OpenAI connection config from DB
+echo ""
+echo "=== OpenAI config in DB ==="
+sqlite3 "$DB_FILE" "SELECT data FROM config WHERE id=1;" | python3 -c "
+import sys, json
+try:
+    data = json.loads(sys.stdin.read())
+    openai = data.get('openai', 'NOT FOUND')
+    print(json.dumps(openai, indent=2))
+except Exception as e:
+    print(f'Could not parse config JSON: {e}')
+" 2>/dev/null || echo "(python3 not available, falling back to grep)"
+sqlite3 "$DB_FILE" "SELECT data FROM config WHERE id=1;" | grep -o '"openai":[^}]*}[^}]*}' || echo "Could not extract openai section with grep"
+
+# Log OpenAI-related environment variables
+echo ""
+echo "=== OpenAI environment variables ==="
+env | grep -iE 'OPENAI|ENABLE_OPENAI' | sort || echo "(no OpenAI env vars found)"
+
+# Test connectivity from backend container to mock-llm
+echo ""
+echo "=== Testing connectivity to mock-llm ==="
+curl -sf --max-time 5 http://mock-llm:8000/ && echo "mock-llm reachable at http://mock-llm:8000/" || echo "WARNING: Cannot reach mock-llm at http://mock-llm:8000/"
+curl -sf --max-time 5 http://mock-llm:8000/v1/models && echo "mock-llm /v1/models endpoint OK" || echo "WARNING: mock-llm /v1/models endpoint not reachable"
+echo ""
+
 # Use internal backend URL for API calls from inside container
 API_URL="$WEBUI_URL"
 
