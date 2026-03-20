@@ -32,45 +32,76 @@ env:
   NODE_VERSION: '18'
 
 jobs:
-  test-headwaione:
-    name: Test with HeadwAI ONE Backend
+  e2e-test:
+    name: Test with ${{ matrix.backend_label }}
     runs-on: ubuntu-latest
-    if: github.event.inputs.test_project != 'openwebui'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: headwaione
+            backend_label: HeadwAI ONE Backend
+            override_file: headwaione/docker-compose.override.yml
+            container_name: headwaione-backend-e2e
+            playwright_config: playwright.headwaione.config.ts
+          - project: openwebui
+            backend_label: Open WebUI Backend
+            override_file: openwebui/docker-compose.override.yml
+            container_name: openwebui-backend-e2e
+            playwright_config: playwright.openwebui.config.ts
 
     steps:
+      - name: Check if this matrix entry should run
+        id: should-run
+        run: |
+          INPUT="${{ github.event.inputs.test_project }}"
+          PROJECT="${{ matrix.project }}"
+          if [ -z "$INPUT" ] || [ "$INPUT" = "both" ] || [ "$INPUT" = "$PROJECT" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping $PROJECT tests (selected: $INPUT)"
+          fi
+
       - name: Checkout repository
+        if: steps.should-run.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        if: steps.should-run.outputs.run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install E2E test dependencies
+        if: steps.should-run.outputs.run == 'true'
         working-directory: e2e
         run: npm install
 
       - name: Install Playwright browsers
+        if: steps.should-run.outputs.run == 'true'
         working-directory: e2e
         run: npx playwright install --with-deps chromium firefox
 
       - name: Log in to GitHub Container Registry
+        if: steps.should-run.outputs.run == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Start Docker services for HeadwAI ONE
+      - name: Start Docker services
+        if: steps.should-run.outputs.run == 'true'
         working-directory: e2e
         run: |
-          docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build -d
+          docker compose -f docker-compose.yml -f ${{ matrix.override_file }} up --build -d
 
           # Wait for mock-llm to be healthy
           timeout=120
           while [ $timeout -gt 0 ]; do
-            if docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml ps mock-llm | grep -q "(healthy)"; then
+            if docker compose -f docker-compose.yml -f ${{ matrix.override_file }} ps mock-llm | grep -q "(healthy)"; then
               echo "Mock LLM service is healthy"
               break
             fi
@@ -81,7 +112,7 @@ jobs:
 
           if [ $timeout -le 0 ]; then
             echo "Mock LLM service failed to become healthy"
-            docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs mock-llm
+            docker compose -f docker-compose.yml -f ${{ matrix.override_file }} logs mock-llm
             exit 1
           fi
 
@@ -89,17 +120,17 @@ jobs:
           timeout=300
           while [ $timeout -gt 0 ]; do
             if curl -sf http://localhost:8085/health >/dev/null 2>&1; then
-              echo "HeadwAI ONE backend is ready"
+              echo "${{ matrix.backend_label }} is ready"
               break
             fi
-            echo "Waiting for HeadwAI ONE backend... ($timeout seconds remaining)"
+            echo "Waiting for ${{ matrix.backend_label }}... ($timeout seconds remaining)"
             sleep 5
             timeout=$((timeout - 5))
           done
 
           if [ $timeout -le 0 ]; then
-            echo "HeadwAI ONE backend failed to start"
-            docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs
+            echo "${{ matrix.backend_label }} failed to start"
+            docker compose -f docker-compose.yml -f ${{ matrix.override_file }} logs
             exit 1
           fi
 
@@ -117,155 +148,41 @@ jobs:
 
           if [ $timeout -le 0 ]; then
             echo "Chat Bubble server failed to start"
-            docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs chat-bubble-dev
+            docker compose -f docker-compose.yml -f ${{ matrix.override_file }} logs chat-bubble-dev
             exit 1
           fi
 
-      - name: Run Playwright tests with HeadwAI ONE
+      - name: Run Playwright tests
+        if: steps.should-run.outputs.run == 'true'
         working-directory: e2e
-        run: E2E_CONTAINER_NAME=headwaione-backend-e2e npx playwright test --config=playwright.headwaione.config.ts
+        run: E2E_CONTAINER_NAME=${{ matrix.container_name }} npx playwright test --config=${{ matrix.playwright_config }}
         env:
           CI: true
 
       - name: Docker logs on failure
         working-directory: e2e
-        if: failure()
-        run: docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs
+        if: failure() && steps.should-run.outputs.run == 'true'
+        run: docker compose -f docker-compose.yml -f ${{ matrix.override_file }} logs
 
       - name: Stop Docker services
         working-directory: e2e
-        if: always()
-        run: docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml down -v
+        if: always() && steps.should-run.outputs.run == 'true'
+        run: docker compose -f docker-compose.yml -f ${{ matrix.override_file }} down -v
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() && steps.should-run.outputs.run == 'true'
         with:
-          name: headwaione-test-results
+          name: ${{ matrix.project }}-test-results
           path: |
-            e2e/headwaione/test-results/
-            e2e/headwaione/playwright-report/
-          retention-days: 7
-
-  test-openwebui:
-    name: Test with Open WebUI Backend
-    runs-on: ubuntu-latest
-    if: github.event.inputs.test_project != 'headwaione'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install E2E test dependencies
-        working-directory: e2e
-        run: npm install
-
-      - name: Install Playwright browsers
-        working-directory: e2e
-        run: npx playwright install --with-deps chromium firefox
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
-
-      - name: Start Docker services for Open WebUI
-        working-directory: e2e
-        run: |
-          docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml up --build -d
-
-          # Wait for mock-llm to be healthy
-          timeout=120
-          while [ $timeout -gt 0 ]; do
-            if docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml ps mock-llm | grep -q "(healthy)"; then
-              echo "Mock LLM service is healthy"
-              break
-            fi
-            echo "Waiting for Mock LLM service... ($timeout seconds remaining)"
-            sleep 5
-            timeout=$((timeout - 5))
-          done
-
-          if [ $timeout -le 0 ]; then
-            echo "Mock LLM service failed to become healthy"
-            docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs mock-llm
-            exit 1
-          fi
-
-          # Wait for backend to be healthy
-          timeout=300
-          while [ $timeout -gt 0 ]; do
-            if curl -sf http://localhost:8085/health >/dev/null 2>&1; then
-              echo "Open WebUI backend is ready"
-              break
-            fi
-            echo "Waiting for Open WebUI backend... ($timeout seconds remaining)"
-            sleep 5
-            timeout=$((timeout - 5))
-          done
-
-          if [ $timeout -le 0 ]; then
-            echo "Open WebUI backend failed to start"
-            docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs
-            exit 1
-          fi
-
-          # Wait for chat bubble widget server
-          timeout=120
-          while [ $timeout -gt 0 ]; do
-            if curl -sf http://localhost:5174 >/dev/null 2>&1; then
-              echo "Chat Bubble server is ready"
-              break
-            fi
-            echo "Waiting for Chat Bubble server... ($timeout seconds remaining)"
-            sleep 2
-            timeout=$((timeout - 2))
-          done
-
-          if [ $timeout -le 0 ]; then
-            echo "Chat Bubble server failed to start"
-            docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs chat-bubble-dev
-            exit 1
-          fi
-
-      - name: Run Playwright tests with Open WebUI
-        working-directory: e2e
-        run: E2E_CONTAINER_NAME=openwebui-backend-e2e npx playwright test --config=playwright.openwebui.config.ts
-        env:
-          CI: true
-
-      - name: Docker logs on failure
-        working-directory: e2e
-        if: failure()
-        run: docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs
-
-      - name: Stop Docker services
-        working-directory: e2e
-        if: always()
-        run: docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml down -v
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: openwebui-test-results
-          path: |
-            e2e/openwebui/test-results/
-            e2e/openwebui/playwright-report/
+            e2e/${{ matrix.project }}/test-results/
+            e2e/${{ matrix.project }}/playwright-report/
           retention-days: 7
 
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [test-headwaione, test-openwebui]
+    needs: [e2e-test]
     if: always()
 
     steps:
@@ -273,22 +190,6 @@ jobs:
         run: |
           echo "## Chat Bubble Widget E2E Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ needs.test-headwaione.result }}" = "success" ]; then
-            echo "✅ HeadwAI ONE backend tests: **PASSED**" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.test-headwaione.result }}" = "failure" ]; then
-            echo "❌ HeadwAI ONE backend tests: **FAILED**" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.test-headwaione.result }}" = "skipped" ]; then
-            echo "⏭️ HeadwAI ONE backend tests: **SKIPPED**" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.test-openwebui.result }}" = "success" ]; then
-            echo "✅ Open WebUI backend tests: **PASSED**" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.test-openwebui.result }}" = "failure" ]; then
-            echo "❌ Open WebUI backend tests: **FAILED**" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.test-openwebui.result }}" = "skipped" ]; then
-            echo "⏭️ Open WebUI backend tests: **SKIPPED**" >> $GITHUB_STEP_SUMMARY
-          fi
-
+          echo "Result: **${{ needs.e2e-test.result }}**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Test artifacts are available for failed runs." >> $GITHUB_STEP_SUMMARY

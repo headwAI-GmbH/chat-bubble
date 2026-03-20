@@ -93,7 +93,46 @@ INSERT INTO api_key VALUES('key_7a9b8155-82f6-41db-920c-d1aceb024c30','7a9b8155-
 
 EOF
 
-echo "Database prepared for testing"
+# Verify critical tables have expected data
+echo "Verifying database contents..."
+ERRORS=0
+
+verify_count() {
+  local table="$1"
+  local expected="$2"
+  local actual
+  actual=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM $table;")
+  if [ "$actual" -ne "$expected" ]; then
+    echo "ERROR: Expected $expected rows in '$table', got $actual"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo "  OK: $table has $actual rows"
+  fi
+}
+
+verify_count "user" 2
+verify_count "auth" 2
+verify_count "model" 4
+verify_count "access_grant" 3
+verify_count "config" 1
+verify_count "api_key" 1
+verify_count '"group"' 1
+
+# Verify the OpenAI config is present in config table
+OPENAI_CHECK=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM config WHERE data LIKE '%openai%api_base_urls%';")
+if [ "$OPENAI_CHECK" -eq 0 ]; then
+  echo "ERROR: config table is missing OpenAI connection settings"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "  OK: config contains OpenAI settings"
+fi
+
+if [ "$ERRORS" -gt 0 ]; then
+  echo "Database verification FAILED with $ERRORS error(s)"
+  exit 1
+fi
+
+echo "Database verified successfully"
 
 # Use internal backend URL for API calls from inside container
 API_URL="$WEBUI_URL"
