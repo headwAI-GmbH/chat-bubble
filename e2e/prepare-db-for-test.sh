@@ -153,11 +153,25 @@ echo ""
 echo "=== OpenAI environment variables ==="
 env | grep -iE 'OPENAI|ENABLE_OPENAI' | sort || echo "(no OpenAI env vars found)"
 
-# Test connectivity from backend container to mock-llm
+# Test connectivity from backend container to mock-llm using URL from DB
 echo ""
 echo "=== Testing connectivity to mock-llm ==="
-curl -sf --max-time 5 http://mock-llm:8000/ && echo "mock-llm reachable at http://mock-llm:8000/" || echo "WARNING: Cannot reach mock-llm at http://mock-llm:8000/"
-curl -sf --max-time 5 http://mock-llm:8000/v1/models && echo "mock-llm /v1/models endpoint OK" || echo "WARNING: mock-llm /v1/models endpoint not reachable"
+MOCK_LLM_URL=$(sqlite3 "$DB_FILE" "SELECT data FROM config WHERE id=1;" | python3 -c "
+import sys, json
+data = json.loads(sys.stdin.read())
+urls = data.get('openai', {}).get('api_base_urls', [])
+print(urls[0] if urls else '')
+" 2>/dev/null)
+
+if [ -n "$MOCK_LLM_URL" ]; then
+  # Strip trailing slash for consistent URL joining
+  MOCK_LLM_URL="${MOCK_LLM_URL%/}"
+  echo "Using mock-llm URL from DB: $MOCK_LLM_URL"
+  curl -sf --max-time 5 "$MOCK_LLM_URL/health" && echo "mock-llm /health endpoint OK" || echo "WARNING: mock-llm /health endpoint not reachable at $MOCK_LLM_URL/health"
+  curl -sf --max-time 5 "$MOCK_LLM_URL/models" && echo "mock-llm /models endpoint OK" || echo "WARNING: mock-llm /models endpoint not reachable at $MOCK_LLM_URL/models"
+else
+  echo "WARNING: Could not extract mock-llm URL from DB config"
+fi
 echo ""
 
 # Use internal backend URL for API calls from inside container
