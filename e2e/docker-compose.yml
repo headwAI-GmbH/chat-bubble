@@ -26,6 +26,8 @@ services:
       # Common environment variables
       CORS_ALLOW_ORIGIN: http://localhost:5174
       ENABLE_OLLAMA_API: 'false'
+      OPENAI_API_BASE_URLS: 'http://mock-llm:8000'
+      OPENAI_API_KEYS: 'your-secret-api-key'
       ENABLE_SIGNUP: 'true'
       DEFAULT_USER_ROLE: 'user'
       LOG_LEVEL: 'DEBUG'
