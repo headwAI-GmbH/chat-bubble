@@ -8,9 +8,12 @@ Tests use [llmock](https://github.com/modAI-systems/llmock) as a mock LLM (echoe
 
 ```
 e2e/
+├── .gitignore                         # Ignores test artifacts (playwright-report, test-results)
+├── Caddyfile                          # Caddy config for HeadwAI ONE reverse proxy
 ├── docker-compose.yml                # Shared services (mock-llm, backend, chat-bubble-dev)
 ├── Dockerfile.chat-bubble            # Builds & serves the widget for testing
 ├── entrypoint.sh                     # Generates test.html and starts http-server
+├── package-lock.json                 # Locked test dependency versions
 ├── prepare-db-for-test.sh            # DB seed script (runs inside backend container)
 ├── playwright.headwaione.config.ts   # Playwright config for HeadwAI ONE
 ├── playwright.openwebui.config.ts    # Playwright config for Open WebUI
