@@ -10,7 +10,7 @@ services:
   # Chat Bubble with Open WebUI configuration
   chat-bubble-dev:
     environment:
-      VITE_CHAT_BUBBLE_API_KEY: 'sk-a17db10484dd4ab0b35626c78cad6aad'
+      VITE_CHAT_BUBBLE_API_KEY: 'sk-test-api-key'
       VITE_CHAT_BUBBLE_CHAT_TITLE: 'Open WebUI Assistant'
 
 volumes:

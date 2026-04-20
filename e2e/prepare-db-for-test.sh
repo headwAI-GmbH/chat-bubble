@@ -88,7 +88,7 @@ INSERT INTO model VALUES('test-admin-assistant','7a9b8155-82f6-41db-920c-d1aceb0
 INSERT INTO "group" VALUES('794c7a11-e5a1-4a84-a726-0f1db788587d','7a9b8155-82f6-41db-920c-d1aceb024c30','Test PVP2 Header Group','','{}','null','{"workspace": {"models": true, "knowledge": true, "prompts": true, "tools": true, "skills": true, "models_import": true, "models_export": true, "prompts_import": true, "prompts_export": true, "tools_import": true, "tools_export": true}, "sharing": {"models": true, "public_models": true, "knowledge": true, "public_knowledge": true, "prompts": true, "public_prompts": true, "tools": true, "public_tools": true, "skills": true, "public_skills": true, "notes": true, "public_notes": true}, "chat": {"controls": true, "valves": true, "system_prompt": true, "params": true, "file_upload": true, "delete": true, "delete_message": true, "continue_response": true, "regenerate_response": true, "rate_response": true, "edit": true, "share": true, "export": true, "stt": true, "tts": true, "call": true, "multiple_models": true, "temporary": true, "temporary_enforced": false}, "features": {"api_keys": false, "notes": true, "channels": true, "folders": true, "direct_tool_servers": false, "web_search": true, "image_generation": true, "code_interpreter": true, "memories": true}, "settings": {"interface": true}}',1772463585,1772463585);
 
 -- Add api-key for test admin and llmock config
-INSERT INTO api_key VALUES('key_7a9b8155-82f6-41db-920c-d1aceb024c30','7a9b8155-82f6-41db-920c-d1aceb024c30','sk-a17db10484dd4ab0b35626c78cad6aad',NULL,NULL,NULL,1772705231,1772705231);
+INSERT INTO api_key VALUES('key_7a9b8155-82f6-41db-920c-d1aceb024c30','7a9b8155-82f6-41db-920c-d1aceb024c30','sk-test-api-key',NULL,NULL,NULL,1772705231,1772705231);
 
 EOF
 

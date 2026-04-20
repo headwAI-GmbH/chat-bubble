@@ -19,6 +19,7 @@ services:
   # Backend service (to be overridden by specific backend configs)
   backend:
     image: ghcr.io/open-webui/open-webui:main # Default image, will be overridden
+    platform: linux/amd64
     container_name: backend-e2e
     ports:
       - '8085:8085'
@@ -73,16 +74,7 @@ services:
       backend:
         condition: service_started
 
-  # Database cleanup service
-  cleanup:
-    image: busybox
-    command: rm -rf /app/backend/data/* || true
-    volumes:
-      - backend-data:/app/backend/data
-
 volumes:
-  backend-data:
-    driver: local
 
 networks:
   default:
