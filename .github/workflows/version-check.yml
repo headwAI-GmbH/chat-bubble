@@ -3,8 +3,6 @@ name: Version Bump Check
 on:
   pull_request:
     branches: [main]
-  push:
-    branches-ignore: [main]
 
 jobs:
   version-check:
