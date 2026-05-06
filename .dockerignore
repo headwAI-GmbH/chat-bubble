@@ -1,0 +1,26 @@
+# Prevent local environment files from leaking into Docker builds
+.env
+.env.*
+!.env.example
+
+# Build outputs (rebuilt inside container)
+dist-widget/
+node_modules/
+
+# Development and CI files
+.git/
+.github/
+.vscode/
+docs/
+
+# E2E files (except entrypoint.sh which is needed by the Dockerfile)
+e2e/tests/
+e2e/headwaione/
+e2e/openwebui/
+e2e/node_modules/
+e2e/playwright-report/
+e2e/*.config.ts
+
+# Test files
+*.spec.*
+test-widget.html

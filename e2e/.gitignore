@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Test results
+openwebui/test-results/
+openwebui/playwright-report/
+headwaione/test-results/
+headwaione/playwright-report/
+playwright/.cache/
+
+# Logs
+*.log

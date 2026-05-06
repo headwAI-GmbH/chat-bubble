@@ -1,0 +1,18 @@
+services:
+  # Open WebUI Backend Configuration
+  backend:
+    image: ghcr.io/open-webui/open-webui:main
+    platform: linux/amd64
+    container_name: openwebui-backend-e2e
+    volumes:
+      - openwebui-data:/app/backend/data
+
+  # Chat Bubble with Open WebUI configuration
+  chat-bubble-dev:
+    environment:
+      VITE_CHAT_BUBBLE_API_KEY: 'sk-test-api-key'
+      VITE_CHAT_BUBBLE_CHAT_TITLE: 'Open WebUI Assistant'
+
+volumes:
+  openwebui-data:
+    driver: local

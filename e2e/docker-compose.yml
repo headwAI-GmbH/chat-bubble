@@ -1,0 +1,79 @@
+services:
+  # Mock LLM Service (shared by both backends)
+  mock-llm:
+    image: ghcr.io/modai-systems/llmock:latest
+    platform: linux/amd64
+    ports:
+      - '8086:8000'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -sf http://127.0.0.1:8000/ > /dev/null 2>&1 || wget -q --spider http://127.0.0.1:8000/ > /dev/null 2>&1 || nc -z 127.0.0.1 8000',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  # Backend service (to be overridden by specific backend configs)
+  backend:
+    image: ghcr.io/open-webui/open-webui:main # Default image, will be overridden
+    platform: linux/amd64
+    container_name: backend-e2e
+    ports:
+      - '8085:8085'
+    environment:
+      # Common environment variables
+      CORS_ALLOW_ORIGIN: http://localhost:5174
+      ENABLE_OLLAMA_API: 'false'
+      OPENAI_API_BASE_URLS: 'http://mock-llm:8000'
+      OPENAI_API_KEYS: 'your-secret-api-key'
+      ENABLE_SIGNUP: 'true'
+      DEFAULT_USER_ROLE: 'user'
+      LOG_LEVEL: 'DEBUG'
+      HOST: '0.0.0.0'
+      PORT: '8085'
+      # Server Configuration
+      WEBUI_URL: 'http://localhost:8085'
+      ##
+      ENABLE_EVALUATION_ARENA_MODELS: 'false'
+      USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS: 'true'
+      USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS: 'true'
+      USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS: 'true'
+    volumes:
+      - ./prepare-db-for-test.sh:/app/prepare-db-for-test.sh:ro
+    depends_on:
+      mock-llm:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Chat Bubble Widget Development Server
+  chat-bubble-dev:
+    build:
+      context: ..
+      dockerfile: e2e/Dockerfile.chat-bubble
+    container_name: chat-bubble-dev-e2e
+    ports:
+      - '5174:5174'
+    environment:
+      # Default environment variables (can be overridden)
+      VITE_CHAT_BUBBLE_API_URL: 'http://localhost:8085'
+      VITE_CHAT_BUBBLE_ASSISTANT_ID: 'test-admin-assistant'
+      VITE_CHAT_BUBBLE_MAX_MESSAGES: '50'
+      VITE_CHAT_BUBBLE_PLACEHOLDER_TEXT: 'Type your message...'
+      VITE_CHAT_BUBBLE_INITIAL_MESSAGE: 'Hello! How can I help you today?'
+      VITE_CHAT_BUBBLE_CHAT_TITLE: 'Test Admin Assistant'
+      VITE_CHAT_BUBBLE_LOCALE: 'en'
+    depends_on:
+      backend:
+        condition: service_started
+
+networks:
+  default:
+    name: chat-bubble-e2e-network

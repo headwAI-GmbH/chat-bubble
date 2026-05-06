@@ -1,0 +1,20 @@
+:80 {
+	# Handle requests to /at.gv.noe.kinoel/ (with trailing slash) - strip the prefix
+	handle_path /at.gv.noe.kinoel/* {
+		reverse_proxy backend:8085
+	}
+	
+	# Handle requests to /at.gv.noe.kinoel (without trailing slash) - strip the prefix  
+	handle_path /at.gv.noe.kinoel {
+		reverse_proxy backend:8085
+	}
+
+	# Also handle /foobar for backward compatibility
+	handle_path /foobar/* {
+		reverse_proxy backend:8085
+	}
+	
+	handle_path /foobar {
+		reverse_proxy backend:8085
+	}
+}

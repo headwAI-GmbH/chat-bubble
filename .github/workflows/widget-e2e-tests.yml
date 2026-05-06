@@ -1,0 +1,123 @@
+name: Chat Bubble Widget E2E Tests
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      test_project:
+        description: 'Test project to run (headwaione, openwebui, or both)'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - headwaione
+          - openwebui
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  e2e-test:
+    name: Test with ${{ matrix.backend_label }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: headwaione
+            backend_label: HeadwAI ONE Backend
+            override_file: headwaione/docker-compose.override.yml
+            container_name: headwaione-backend-e2e
+            playwright_config: playwright.headwaione.config.ts
+          - project: openwebui
+            backend_label: Open WebUI Backend
+            override_file: openwebui/docker-compose.override.yml
+            container_name: openwebui-backend-e2e
+            playwright_config: playwright.openwebui.config.ts
+
+    steps:
+      - name: Check if this matrix entry should run
+        id: should-run
+        run: |
+          INPUT="${{ github.event.inputs.test_project }}"
+          PROJECT="${{ matrix.project }}"
+          if [ -z "$INPUT" ] || [ "$INPUT" = "both" ] || [ "$INPUT" = "$PROJECT" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping $PROJECT tests (selected: $INPUT)"
+          fi
+
+      - name: Checkout repository
+        if: steps.should-run.outputs.run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: steps.should-run.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install E2E test dependencies
+        if: steps.should-run.outputs.run == 'true'
+        working-directory: e2e
+        run: npm install
+
+      - name: Install Playwright browsers
+        if: steps.should-run.outputs.run == 'true'
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Log in to GitHub Container Registry
+        if: steps.should-run.outputs.run == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Run Playwright tests
+        if: steps.should-run.outputs.run == 'true'
+        working-directory: e2e
+        run: E2E_CONTAINER_NAME=${{ matrix.container_name }} npx playwright test --config=${{ matrix.playwright_config }}
+        env:
+          CI: true
+
+      - name: Docker logs on failure
+        working-directory: e2e
+        if: failure() && steps.should-run.outputs.run == 'true'
+        run: docker compose -f docker-compose.yml -f ${{ matrix.override_file }} logs
+
+      - name: Stop Docker services
+        working-directory: e2e
+        if: always() && steps.should-run.outputs.run == 'true'
+        run: docker compose -f docker-compose.yml -f ${{ matrix.override_file }} down -v
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure() && steps.should-run.outputs.run == 'true'
+        with:
+          name: ${{ matrix.project }}-test-results
+          path: |
+            e2e/${{ matrix.project }}/test-results/
+            e2e/${{ matrix.project }}/playwright-report/
+          retention-days: 7
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [e2e-test]
+    if: always()
+
+    steps:
+      - name: Display test results
+        run: |
+          echo "## Chat Bubble Widget E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Result: **${{ needs.e2e-test.result }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Test artifacts are available for failed runs." >> $GITHUB_STEP_SUMMARY

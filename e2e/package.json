@@ -1,0 +1,27 @@
+{
+  "name": "chat-bubble-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for Chat Bubble",
+  "type": "module",
+  "scripts": {
+    "test:openwebui": "E2E_CONTAINER_NAME=openwebui-backend-e2e playwright test --config=playwright.openwebui.config.ts",
+    "test:headwaione": "E2E_CONTAINER_NAME=headwaione-backend-e2e playwright test --config=playwright.headwaione.config.ts",
+    "test:openwebui:ui": "E2E_CONTAINER_NAME=openwebui-backend-e2e playwright test --config=playwright.openwebui.config.ts --ui",
+    "test:headwaione:ui": "E2E_CONTAINER_NAME=headwaione-backend-e2e playwright test --config=playwright.headwaione.config.ts --ui",
+    "test:openwebui:debug": "E2E_CONTAINER_NAME=openwebui-backend-e2e playwright test --config=playwright.openwebui.config.ts --debug",
+    "test:headwaione:debug": "E2E_CONTAINER_NAME=headwaione-backend-e2e playwright test --config=playwright.headwaione.config.ts --debug",
+    "test:openwebui:headed": "E2E_CONTAINER_NAME=openwebui-backend-e2e playwright test --config=playwright.openwebui.config.ts --headed",
+    "test:headwaione:headed": "E2E_CONTAINER_NAME=headwaione-backend-e2e playwright test --config=playwright.headwaione.config.ts --headed",
+    "docker:openwebui:up": "docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml up --build -d",
+    "docker:openwebui:down": "docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml down -v",
+    "docker:openwebui:logs": "docker compose -f docker-compose.yml -f openwebui/docker-compose.override.yml logs -f",
+    "docker:headwaione:up": "docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build -d",
+    "docker:headwaione:down": "docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml down -v",
+    "docker:headwaione:logs": "docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml logs -f"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}

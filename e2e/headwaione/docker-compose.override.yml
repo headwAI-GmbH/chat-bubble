@@ -1,0 +1,24 @@
+services:
+  # HeadwAI ONE Backend Configuration
+  backend:
+    image: ghcr.io/headwai-gmbh/headwai-open-webui:latest
+    platform: linux/amd64
+    container_name: headwaione-backend-e2e
+    environment:
+      # HeadwAI ONE specific settings
+      ENABLE_SHARE_WITH_USERS: 'true'
+      ENABLE_ADMIN_EXPORT: 'false'
+      SIGNIN_RATE_LIMIT: '0'
+
+    volumes:
+      - headwaione-data:/app/backend/data
+
+  # Chat Bubble with HeadwAI ONE configuration
+  chat-bubble-dev:
+    environment:
+      VITE_CHAT_BUBBLE_CHAT_TITLE: 'HeadwAI Assistant'
+      # HeadwAI ONE uses Origin header authentication instead of API key
+
+volumes:
+  headwaione-data:
+    driver: local
