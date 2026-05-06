@@ -604,38 +604,13 @@
     }
 
     if (details.body && details.body.messages) {
-      // Generate new message IDs for this request if not already set
-      if (!$currentUserMessageId) {
-        currentUserMessageId.set(generateUUID());
-      }
-      if (!$currentAssistantMessageId) {
-        currentAssistantMessageId.set(generateUUID());
-      }
+      // Always generate fresh IDs for each message exchange
+      const userMessageId = generateUUID();
+      const assistantMessageId = generateUUID();
+      currentUserMessageId.set(userMessageId);
+      currentAssistantMessageId.set(assistantMessageId);
 
-      details.body.chat_id = $chatId;
-      details.body.id = $currentAssistantMessageId;
-      details.body.parent_id = $currentUserMessageId;
-
-      // Add parent message to the request body if available
-      if ($messageHistory.length > 0) {
-        // Get the last non-feedback message from history as the parent for the current user message
-        const lastNonFeedbackMessage = [...$messageHistory]
-          .reverse()
-          .find((msg) => msg.role !== DEEP_CHAT_FEEDBACK_ROLE);
-
-        if (lastNonFeedbackMessage) {
-          details.body.parent_message = {
-            id: lastNonFeedbackMessage.id,
-            parentId: lastNonFeedbackMessage.parentId || null,
-            childrenIds: lastNonFeedbackMessage.childrenIds || [],
-            role: lastNonFeedbackMessage.role,
-            content: lastNonFeedbackMessage.content,
-            timestamp: lastNonFeedbackMessage.timestamp,
-            models: lastNonFeedbackMessage.models || [assistantId],
-          };
-        }
-      }
-
+      // Transform messages to headwai format first so we can read the user content
       details.body.messages = removeReferencesFromMessages(
         transformMessagesFromDeepChatToHeadwai(details.body.messages),
       );
@@ -643,13 +618,41 @@
       // Filter out messages with the role 'feedback'
       details.body.messages = removeFeedbackMessages(details.body.messages);
 
-      // Store the current user message for later use in response interceptor
+      // Get current user message content for later use in storeChatHistory
       const currentUserContent = getCurrentUserMessageContent(
         details.body.messages,
       );
       if (currentUserContent) {
         currentUserMessageContent.set(currentUserContent);
       }
+
+      // Find the last assistant message in history — its ID is the parentId of the current user message
+      const lastAssistantMessage =
+        $messageHistory.length > 0
+          ? [...$messageHistory]
+              .reverse()
+              .find((msg) => msg.role === HEADWAI_ASSISTANT_ROLE)
+          : null;
+      const parentAssistantId = lastAssistantMessage
+        ? lastAssistantMessage.id
+        : null;
+
+      details.body.chat_id = $chatId;
+      // Do NOT send 'id' (assistant message ID) — when chat_id + message_id are both present
+      // the backend routes the response through WebSocket event emission instead of HTTP streaming,
+      // resulting in a null HTTP response. Without message_id, the backend returns SSE directly.
+      // parent_id = parentId of the current user message (i.e. the previous assistant message ID)
+      details.body.parent_id = parentAssistantId;
+
+      // user_message = the current user message object (what the backend stores as the user's turn)
+      details.body.user_message = {
+        id: userMessageId,
+        parentId: parentAssistantId,
+        childrenIds: [assistantMessageId],
+        role: USER_ROLE,
+        content: currentUserContent || '',
+        timestamp: Math.floor(Date.now() / 1000),
+      };
     }
     return details;
   };
@@ -832,13 +835,18 @@
         );
         return;
       }
-      // Find the previous message to link to
-      const previousMessage = $messageHistory[$messageHistory.length - 1];
+      // Find the last assistant message to link to (skip feedback messages)
+      const previousAssistantMessage =
+        $messageHistory.length > 0
+          ? [...$messageHistory]
+              .reverse()
+              .find((msg) => msg.role === HEADWAI_ASSISTANT_ROLE)
+          : null;
 
       // Create user message object
       const userMessageObj = {
         id: userMessageId,
-        parentId: previousMessage ? previousMessage.id : null,
+        parentId: previousAssistantMessage ? previousAssistantMessage.id : null,
         childrenIds: [assistantMessageId],
         role: USER_ROLE,
         content: userMessage,
@@ -854,15 +862,15 @@
         role: HEADWAI_ASSISTANT_ROLE,
         content: assistantMessage,
         model: models[0],
-        modelId: models[0], // You might want to map this to a display name
+        modelId: models[0],
         modelIdx: 0,
         timestamp: timestamp,
         sources: assistantMessageSources,
       };
 
-      // Update the previous message's children if it exists
-      if (previousMessage) {
-        previousMessage.childrenIds = [userMessageId];
+      // Update the previous assistant message's children to include the new user message
+      if (previousAssistantMessage) {
+        previousAssistantMessage.childrenIds = [userMessageId];
       }
 
       // Add new messages to history (user and assistant messages only)
