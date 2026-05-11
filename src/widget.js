@@ -23,6 +23,7 @@ function getConfig() {
     disclaimerMessage: import.meta.env.VITE_CHAT_BUBBLE_DISCLAIMER_MESSAGE,
     infoTitle: import.meta.env.VITE_CHAT_BUBBLE_INFO_TITLE,
     infoMessage: import.meta.env.VITE_CHAT_BUBBLE_INFO_MESSAGE,
+    errorMessage: import.meta.env.VITE_CHAT_BUBBLE_ERROR_MESSAGE,
   };
 
   // Allow runtime override via global variables
@@ -61,6 +62,7 @@ function mergeDataAttributes(config, container) {
     chatBubbleDisclaimerMessage: 'disclaimerMessage',
     chatBubbleInfoTitle: 'infoTitle',
     chatBubbleInfoMessage: 'infoMessage',
+    chatBubbleErrorMessage: 'errorMessage',
   };
 
   Object.keys(container.dataset).forEach((key) => {
