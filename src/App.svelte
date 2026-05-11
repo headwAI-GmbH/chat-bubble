@@ -57,6 +57,7 @@
           assistantId={computedAssistantId}
           maxMessages={computedMaxMessages}
           submitButtonBackgroundColor={computedBackgroundColor}
+          errorMessage={computedErrorMessage}
         />
       {/if}
 
@@ -124,6 +125,7 @@
   export let enableSpeechBubbleHint = undefined;
   export let speechBubbleHintBackgroundColor = undefined;
   export let speechBubbleHintTextColor = undefined;
+  export let errorMessage = undefined;
 
   let deepChatRef; // Reference to the deep-chat component
 
@@ -231,6 +233,11 @@
     infoMessage ||
     import.meta.env.VITE_CHAT_BUBBLE_INFO_MESSAGE ||
     $tStore('chat.info.message');
+
+  $: computedErrorMessage =
+    errorMessage ||
+    import.meta.env.VITE_CHAT_BUBBLE_ERROR_MESSAGE ||
+    $tStore('chat.content.errorMessage');
 
   $: computedSpeechBubbleHintMessage =
     speechBubbleHintMessage ||

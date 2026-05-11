@@ -49,6 +49,7 @@ Add the HeadwAI Chat Bubble to the respective .html file.
         disclaimerMessage: 'Please accept our terms before using this service.',
         infoTitle: 'Support Information',
         infoMessage: 'For help, contact support@example.com',
+        errorMessage: 'An error occurred, please try again.',
       };
     </script>
   </head>
@@ -116,6 +117,7 @@ For multiple instances use data attributes of the `<div>` tag for configuration 
   data-chat-bubble-disclaimer-message="Please accept our terms before using this service"
   data-chat-bubble-info-title="Support Information"
   data-chat-bubble-info-message="For help, contact support@example.com"
+  data-chat-bubble-error-message="An error occurred, please try again."
 ></div>
 
 <!-- Another HeadwAI Chat Bubble with different config -->
@@ -236,6 +238,15 @@ The title displayed in the chat window header at the top of the chat interface. 
 
 ```javascript
 chatTitle: 'Customer Support';
+```
+
+#### `errorMessage`
+
+**Type:** `string` | **Default:** Translation-based (`'Error, please try again.'` in English, `'Fehler, bitte versuchen Sie es erneut.'` in German)  
+The error message displayed in the chat when the API connection fails or a request error occurs.
+
+```javascript
+errorMessage: 'Something went wrong, please try again.';
 ```
 
 #### `locale`
@@ -708,6 +719,7 @@ When using data attributes for multiple HeadwAI Chat Bubbles, convert camelCase 
 - `enableSpeechBubbleHint` → `data-chat-bubble-enable-speech-bubble-hint`
 - `speechBubbleHintBackgroundColor` → `data-chat-bubble-speech-bubble-hint-background-color`
 - `speechBubbleHintTextColor` → `data-chat-bubble-speech-bubble-hint-text-color`
+- `errorMessage` → `data-chat-bubble-error-message`
 
 ## Troubleshooting
 

@@ -15,6 +15,7 @@ export default {
     content: {
       placeholder: 'Geben Sie hier Ihre Fragen ein',
       initialMessage: 'Hallo, wie kann ich Ihnen helfen?',
+      errorMessage: 'Fehler, bitte versuchen Sie es erneut.',
       feedback: {
         positive: 'Gute Antwort',
         negative: 'Schlechte Antwort',

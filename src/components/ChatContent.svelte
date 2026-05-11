@@ -12,6 +12,7 @@
     {responseInterceptor}
     onMessage={handleMessage}
     {submitButtonStyles}
+    {errorMessages}
   />
 </div>
 
@@ -61,6 +62,7 @@
   export let assistantId;
   export let maxMessages;
   export let submitButtonBackgroundColor;
+  export let errorMessage;
 
   // Initialize HeadwAI API instance
   const headwaiAPI = createHeadwAIAPI(apiUrl, apiKey);
@@ -175,6 +177,12 @@
   const chatStyle = {
     fontSize: fontSize,
     fontFamily: fontFamily,
+  };
+
+  const errorMessages = {
+    overrides: {
+      default: errorMessage,
+    },
   };
 
   // Configure text input with customizable placeholder
