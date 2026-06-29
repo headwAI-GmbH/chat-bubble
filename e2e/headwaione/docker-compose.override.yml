@@ -1,7 +1,7 @@
 services:
   # HeadwAI ONE Backend Configuration
   backend:
-    image: registry.gitlab.com/headwai-gmbh/headwai-open-webui:latest
+    image: gitlab.headwai.org:5050/headwai-gmbh/headwai-open-webui:latest
     platform: linux/amd64
     container_name: headwaione-backend-e2e
     environment:
