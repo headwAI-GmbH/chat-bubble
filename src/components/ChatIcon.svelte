@@ -1,4 +1,5 @@
 <button
+  type="button"
   class="ai-assistant-icon"
   style="background: {faviconBackgroundColor}"
   on:click={toggleChat}
