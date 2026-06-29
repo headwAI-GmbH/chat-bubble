@@ -17,7 +17,7 @@ on:
           - openwebui
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
 
 jobs:
   e2e-test:
