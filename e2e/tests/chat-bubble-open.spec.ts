@@ -168,7 +168,7 @@ test('Closing chat bubble keeps conversation', async ({ page }) => {
     `);
 
   await page.getByRole('button', { name: 'Close chat' }).click();
-  await page.getByRole('button', { name: 'HeadwAI Chat Bubble' }).click();
+  await page.getByRole('button', { name: 'Open HeadwAI Chat' }).click();
 
   await expect(page.locator('#messages')).toMatchAriaSnapshot(`
   - paragraph: Hey, how can I help you?
