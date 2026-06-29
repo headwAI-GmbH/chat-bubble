@@ -131,7 +131,7 @@
   let deepChatRef; // Reference to the deep-chat component
   let chatIconContainer;
   let chatContainer;
-  let prevIsChatOpen;
+  let prevIsChatOpen = $isChatOpen;
 
   afterUpdate(() => {
     if ($isChatOpen !== prevIsChatOpen) {
