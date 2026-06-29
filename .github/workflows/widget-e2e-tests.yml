@@ -80,7 +80,7 @@ jobs:
         if: steps.should-run.outputs.run == 'true'
         uses: docker/login-action@v4
         with:
-          registry: gitlab.headwai.org:5050
+          registry: registry.gitlab.headwai.org
           username: ${{ secrets.GITLAB_REGISTRY_USER }}
           password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
 
