@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Increase accessibility
+- Improved accessibility
 
 ## [8.3.3] - 2026-05-11
 
