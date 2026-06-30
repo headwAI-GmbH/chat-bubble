@@ -1,7 +1,7 @@
 <main>
   <!-- Floating HeadwAI Chat Bubble Icon -->
   {#if !$isChatOpen}
-    <div class="chat-icon-container">
+    <div class="chat-icon-container" bind:this={chatIconContainer}>
       {#if computedEnableSpeechBubbleHint}
         <SpeechBubbleHint
           message={computedSpeechBubbleHintMessage}
@@ -23,6 +23,7 @@
     <div
       class="chat-container"
       style="--font-size: {computedFontSize}; --font-family: {computedFontFamily}; --chat-header-background: {computedBackgroundColor}; --submit-button-color: {computedBackgroundColor}"
+      bind:this={chatContainer}
     >
       <!-- Chat Header -->
       <ChatHeader
@@ -92,7 +93,7 @@
     isDisclaimerInfoOpen,
   } from './stores.js';
   import { initI18n } from './i18n.js';
-  import { setContext, onMount } from 'svelte';
+  import { setContext, onMount, afterUpdate } from 'svelte';
   import { logger } from './logger.js';
   import { writable } from 'svelte/store';
   import { DEEP_CHAT_ASSISTANT_ROLE } from './constants.js';
@@ -128,6 +129,20 @@
   export let errorMessage = undefined;
 
   let deepChatRef; // Reference to the deep-chat component
+  let chatIconContainer;
+  let chatContainer;
+  let prevIsChatOpen = $isChatOpen;
+
+  afterUpdate(() => {
+    if ($isChatOpen !== prevIsChatOpen) {
+      prevIsChatOpen = $isChatOpen;
+      if ($isChatOpen && chatContainer) {
+        chatContainer.querySelector('button')?.focus();
+      } else if (!$isChatOpen && chatIconContainer) {
+        chatIconContainer.querySelector('button')?.focus();
+      }
+    }
+  });
 
   // Create translation function store with fallback
   const tStore = writable((key) => key);

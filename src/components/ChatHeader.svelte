@@ -8,7 +8,6 @@
       <button
         class="chat-new-button"
         on:click={startNewChat}
-        on:keydown={(e) => e.key === 'Enter' && startNewChat()}
         aria-label={$t('chat.header.newChat')}
         title={$t('chat.header.newChat')}
       >
@@ -30,7 +29,6 @@
       <button
         class="chat-download-button"
         on:click={downloadMessageHistory}
-        on:keydown={(e) => e.key === 'Enter' && downloadMessageHistory()}
         aria-label={$t('chat.header.downloadHistory')}
         title={$t('chat.header.downloadHistory')}
         disabled={!$chatId || $messageHistory.length === 0}
@@ -51,7 +49,6 @@
       <button
         class="chat-info-button"
         on:click={showDisclaimerInfo}
-        on:keydown={(e) => e.key === 'Enter' && showDisclaimerInfo()}
         aria-label={$t('chat.header.showInfo')}
         title={$t('chat.header.showInfo')}
       >
@@ -68,7 +65,6 @@
       <button
         class="chat-close-button"
         on:click={closeChat}
-        on:keydown={(e) => e.key === 'Enter' && closeChat()}
         aria-label={$t('chat.header.closeChat')}
         title={$t('chat.header.closeChat')}
       >

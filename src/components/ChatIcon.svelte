@@ -1,13 +1,12 @@
-<div
+<button
+  type="button"
   class="ai-assistant-icon"
   style="background: {faviconBackgroundColor}"
   on:click={toggleChat}
-  on:keydown={(e) => e.key === 'Enter' && toggleChat()}
-  role="button"
-  tabindex="0"
+  aria-label="Open HeadwAI Chat"
 >
-  <img src={iconPath} alt="HeadwAI Chat Bubble" />
-</div>
+  <img src={iconPath} alt="" aria-hidden="true" />
+</button>
 
 <script>
   import { isChatOpen } from '../stores';
@@ -26,6 +25,8 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
+    border: none;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,6 +36,11 @@
     transition:
       transform 0.2s ease,
       box-shadow 0.2s ease;
+  }
+
+  .ai-assistant-icon:focus-visible {
+    outline: 3px solid #005fcc;
+    outline-offset: 3px;
   }
 
   .ai-assistant-icon:hover {

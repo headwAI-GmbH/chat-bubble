@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HeadwAI Chat Bubble</title>
+    <script>
+      // Runtime configuration override
+      window.HEADWAI_CHAT_BUBBLE_CONFIG = {
+        apiUrl: 'https://rnd1.headwai.org/one', // required
+        assistantId: 'chat-bubble', // required
+      };
+    </script>
+    <style>
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        background: white;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        background: white;
+        padding: 60px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        border: 1px solid #e5e7eb;
+      }
+      .logo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 30px;
+      }
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      h1 {
+        color: #333;
+        margin: 0 0 20px;
+        font-size: 32px;
+        font-weight: 600;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 40px;
+        font-size: 18px;
+        line-height: 1.5;
+      }
+      .link {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        margin: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+      .link:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      }
+      .link.secondary {
+        background: #f8f9fa;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+      .link.secondary:hover {
+        background: #667eea;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <img src="/icons/favicon.svg" alt="HeadwAI Logo" />
+      </div>
+      <h1>Chat Bubble</h1>
+      <p class="subtitle">Easy-to-integrate AI chat widget for your website</p>
+
+      <div>
+        <a href="https://chat-bubble.headwai.org/" class="link" target="_blank" rel="noopener noreferrer">
+          🎮 Try it Live
+        </a>
+        <a
+          href="https://www.headwai.org/contact"
+          class="link secondary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          💬 Contact HeadwAI GmbH
+        </a>
+        <a
+          href="https://github.com/headwAI-GmbH/chat-bubble/issues"
+          class="link secondary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          🛠️ Help Develop
+        </a>
+      </div>
+    </div>
+
+    <div id="chat-bubble-container"></div>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@headwai/chat-bubble@latest/dist-widget/chat-bubble.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@headwai/chat-bubble@latest/dist-widget/chat-bubble.js"></script>
+    <!-- <script type="module" src="/src/widget.js"></script> -->
+  </body>
+</html>

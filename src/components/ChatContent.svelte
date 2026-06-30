@@ -1089,6 +1089,35 @@
       firstResponseReceived = false;
       generatedChatTitle.set(null);
     }
+
+    // Deep Chat renders its submit button as a <div> with onclick only — no tabIndex and
+    // no keydown handler, so it is unreachable by keyboard. Patch it via the shadow DOM.
+    let a11yObserver;
+    function patchSubmitButton() {
+      const shadow = deepChatRef?.shadowRoot;
+      if (!shadow) return;
+      const btn = shadow.querySelector('.submit-button');
+      if (!btn || btn.hasAttribute('data-a11y-patched')) return;
+      btn.setAttribute('tabindex', '0');
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('data-a11y-patched', '');
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          btn.click();
+        }
+      });
+      a11yObserver?.disconnect();
+    }
+
+    const shadow = deepChatRef?.shadowRoot;
+    if (shadow) {
+      patchSubmitButton();
+      a11yObserver = new MutationObserver(patchSubmitButton);
+      a11yObserver.observe(shadow, { childList: true, subtree: true });
+    }
+
+    return () => a11yObserver?.disconnect();
   });
 
   // Reactive statement to handle chat state changes

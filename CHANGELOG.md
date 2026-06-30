@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.4] - 2026-06-29
+
+### Fixed
+
+- Improved accessibility
+
 ## [8.3.3] - 2026-05-11
 
 ### Added
