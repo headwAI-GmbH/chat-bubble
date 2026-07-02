@@ -314,7 +314,7 @@
     right: 20px;
     width: 60px;
     height: 60px;
-    z-index: 998;
+    z-index: 999998;
     pointer-events: auto;
   }
 
@@ -326,8 +326,8 @@
       /* Add safe area support for iPhone */
       bottom: calc(16px + env(safe-area-inset-bottom, 0px));
       right: calc(16px + env(safe-area-inset-right, 0px));
-      /* Keep icon below chat window (9999) but above keyboard */
-      z-index: 9998;
+      /* Keep icon below chat window (999999) but above keyboard */
+      z-index: 999998;
     }
   }
 
@@ -348,7 +348,7 @@
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     overflow: hidden;
-    z-index: 999;
+    z-index: 999999;
     background: white;
     pointer-events: auto; /* Enable interactions only within the chat container */
     animation: slideIn 0.3s ease-out;
@@ -389,7 +389,7 @@
       /* Prevent zoom on input focus (Android behavior) */
       -webkit-text-size-adjust: 100%;
       /* Ensure proper stacking above keyboard */
-      z-index: 9999;
+      z-index: 999999;
     }
     /* Additional Android-specific fixes for virtual keyboard issues (portrait) */
     @media (orientation: portrait) {

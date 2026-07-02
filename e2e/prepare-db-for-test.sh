@@ -140,17 +140,26 @@ if ADMIN_BEARER_TOKEN=$(curl -s --fail-with-body "$API_URL/api/v1/auths/signin" 
   
   echo "Got admin token, configuring admin settings, OpenAI connection, and cleanup..."
 
-  ADMIN_CONFIG_PAYLOAD='{"SHOW_ADMIN_DETAILS":true,"ADMIN_EMAIL":null,"WEBUI_URL":"","ENABLE_SIGNUP":false,"ENABLE_API_KEYS":true,"ENABLE_API_KEYS_ENDPOINT_RESTRICTIONS":false,"API_KEYS_ALLOWED_ENDPOINTS":"","DEFAULT_USER_ROLE":"pending","DEFAULT_GROUP_ID":"","JWT_EXPIRES_IN":"4w","ENABLE_COMMUNITY_SHARING":true,"ENABLE_MESSAGE_RATING":true,"ENABLE_FOLDERS":true,"FOLDER_MAX_FILE_COUNT":"","ENABLE_AUTOMATIONS":false,"ENABLE_CHANNELS":false,"ENABLE_CALENDAR":false,"ENABLE_MEMORIES":true,"ENABLE_NOTES":true,"ENABLE_USER_WEBHOOKS":false,"ENABLE_USER_STATUS":true,"PENDING_USER_OVERLAY_TITLE":"","PENDING_USER_OVERLAY_CONTENT":"","RESPONSE_WATERMARK":""}'
+  # Merge our overrides onto the backend's current config so newly added
+  # required fields (the image is the moving :main tag) don't break the POST
+  ADMIN_CONFIG_OVERRIDES='{"SHOW_ADMIN_DETAILS":true,"ADMIN_EMAIL":null,"WEBUI_URL":"","ENABLE_SIGNUP":false,"ENABLE_API_KEYS":true,"ENABLE_API_KEYS_ENDPOINT_RESTRICTIONS":false,"API_KEYS_ALLOWED_ENDPOINTS":"","DEFAULT_USER_ROLE":"pending","DEFAULT_GROUP_ID":"","JWT_EXPIRES_IN":"4w","ENABLE_COMMUNITY_SHARING":true,"ENABLE_MESSAGE_RATING":true,"ENABLE_FOLDERS":true,"FOLDER_MAX_FILE_COUNT":"","ENABLE_AUTOMATIONS":false,"ENABLE_CHANNELS":false,"ENABLE_CALENDAR":false,"ENABLE_MEMORIES":true,"ENABLE_NOTES":true,"ENABLE_USER_WEBHOOKS":false,"ENABLE_USER_STATUS":true,"PENDING_USER_OVERLAY_TITLE":"","PENDING_USER_OVERLAY_CONTENT":"","RESPONSE_WATERMARK":""}'
+
+  if ! CURRENT_ADMIN_CONFIG=$(curl -s --fail-with-body "$API_URL/api/v1/auths/admin/config" \
+    -H "authorization: Bearer $ADMIN_BEARER_TOKEN"); then
+    echo "ERROR: Could not fetch current admin config via API"
+    exit 1
+  fi
+  ADMIN_CONFIG_PAYLOAD=$(jq -c --argjson overrides "$ADMIN_CONFIG_OVERRIDES" '. + $overrides' <<<"$CURRENT_ADMIN_CONFIG")
 
   echo "Enabling API keys via admin config..."
-  if curl -s --fail-with-body "$API_URL/api/v1/auths/admin/config" \
+  if ADMIN_CONFIG_RESPONSE=$(curl -s --fail-with-body "$API_URL/api/v1/auths/admin/config" \
     -X 'POST' \
     -H 'Content-Type: application/json' \
     -H "authorization: Bearer $ADMIN_BEARER_TOKEN" \
-    --data-raw "$ADMIN_CONFIG_PAYLOAD" >/dev/null 2>&1; then
+    --data-raw "$ADMIN_CONFIG_PAYLOAD" 2>&1); then
     echo "Admin config updated via API"
   else
-    echo "ERROR: Could not update admin config via API"
+    echo "ERROR: Could not update admin config via API: $ADMIN_CONFIG_RESPONSE"
     exit 1
   fi
 
@@ -166,14 +175,14 @@ if ADMIN_BEARER_TOKEN=$(curl -s --fail-with-body "$API_URL/api/v1/auths/signin" 
   fi
 
   OPENAI_CONFIG_PAYLOAD='{"ENABLE_OPENAI_API":true,"OPENAI_API_BASE_URLS":["http://mock-llm:8000"],"OPENAI_API_KEYS":["your-secret-api-key"],"OPENAI_API_CONFIGS":{"0":{"enable":true,"tags":[],"prefix_id":"","model_ids":[],"connection_type":"external","auth_type":"bearer"}}}'
-  if curl -s --fail-with-body "$API_URL/openai/config/update" \
+  if OPENAI_CONFIG_RESPONSE=$(curl -s --fail-with-body "$API_URL/openai/config/update" \
     -X 'POST' \
     -H 'Content-Type: application/json' \
     -H "authorization: Bearer $ADMIN_BEARER_TOKEN" \
-    --data-raw "$OPENAI_CONFIG_PAYLOAD" >/dev/null 2>&1; then
+    --data-raw "$OPENAI_CONFIG_PAYLOAD" 2>&1); then
     echo "OpenAI config updated via API"
   else
-    echo "ERROR: Could not update OpenAI config via API"
+    echo "ERROR: Could not update OpenAI config via API: $OPENAI_CONFIG_RESPONSE"
     exit 1
   fi
 
