@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.5] - 2026-07-02
+
+### Changed
+
+- Increase z-index for Chat Icon to 999998 and Chat Container to 999999 for mobile and desktop
+
 ## [8.3.4] - 2026-06-29
 
 ### Fixed
