@@ -63,6 +63,7 @@
   export let maxMessages;
   export let submitButtonBackgroundColor;
   export let errorMessage;
+  export let messageBubbleMaxWidth;
 
   // Initialize HeadwAI API instance
   const headwaiAPI = createHeadwAIAPI(apiUrl, apiKey);
@@ -171,7 +172,7 @@
       },
     },
     alwaysEnabled: true,
-    position: 'outside-right',
+    position: 'outside-end',
   };
 
   const chatStyle = {
@@ -195,6 +196,11 @@
   // Configure message styles with customizable background colors
   const messageStyles = {
     default: {
+      shared: {
+        bubble: {
+          maxWidth: messageBubbleMaxWidth,
+        },
+      },
       user: {
         bubble: {
           backgroundColor: userMessageBackgroundColor,

@@ -41,6 +41,7 @@ Add the HeadwAI Chat Bubble to the respective .html file.
         aiMessageBackgroundColor: '#f1f3f4',
         userMessageTextColor: '#000000',
         aiMessageTextColor: '#000000',
+        messageBubbleMaxWidth: '85%',
         faviconBackgroundColor: '#667eea',
         fontFamily: '"Inter", system-ui, sans-serif',
         fontSize: '16px',
@@ -324,6 +325,15 @@ Text color for feedback buttons (thumbs up/down). Accepts any valid CSS color va
 
 ```javascript
 feedbackMessageTextColor: '#000000';
+```
+
+#### `messageBubbleMaxWidth`
+
+**Type:** `string` | **Default:** `'85%'`  
+Maximum width of the message bubbles relative to the chat window. Accepts any valid CSS max-width value (e.g. `'85%'`, `'300px'`).
+
+```javascript
+messageBubbleMaxWidth: '85%';
 ```
 
 #### `faviconBackgroundColor`
@@ -720,6 +730,7 @@ When using data attributes for multiple HeadwAI Chat Bubbles, convert camelCase 
 - `speechBubbleHintBackgroundColor` → `data-chat-bubble-speech-bubble-hint-background-color`
 - `speechBubbleHintTextColor` → `data-chat-bubble-speech-bubble-hint-text-color`
 - `errorMessage` → `data-chat-bubble-error-message`
+- `messageBubbleMaxWidth` → `data-chat-bubble-message-bubble-max-width`
 
 ## Troubleshooting
 
