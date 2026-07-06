@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.3.6] - 2026-07-06
+
+### Added
+
+- Configurable message bubble max width (`messageBubbleMaxWidth`), default widened from deep-chat's 60% to 85%
+
 ## [8.3.5] - 2026-07-02
 
 ### Changed

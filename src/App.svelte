@@ -59,6 +59,7 @@
           maxMessages={computedMaxMessages}
           submitButtonBackgroundColor={computedBackgroundColor}
           errorMessage={computedErrorMessage}
+          messageBubbleMaxWidth={computedMessageBubbleMaxWidth}
         />
       {/if}
 
@@ -127,6 +128,7 @@
   export let speechBubbleHintBackgroundColor = undefined;
   export let speechBubbleHintTextColor = undefined;
   export let errorMessage = undefined;
+  export let messageBubbleMaxWidth = undefined;
 
   let deepChatRef; // Reference to the deep-chat component
   let chatIconContainer;
@@ -228,6 +230,11 @@
     '#000000';
   const computedMaxMessages =
     parseInt(maxMessages || import.meta.env.VITE_CHAT_BUBBLE_MAX_MESSAGES) || 0;
+
+  const computedMessageBubbleMaxWidth =
+    messageBubbleMaxWidth ||
+    import.meta.env.VITE_CHAT_BUBBLE_MESSAGE_BUBBLE_MAX_WIDTH ||
+    '85%';
 
   $: computedDisclaimerTitle =
     disclaimerTitle ||
