@@ -172,7 +172,7 @@
       },
     },
     alwaysEnabled: true,
-    position: 'outside-right',
+    position: 'outside-end',
   };
 
   const chatStyle = {
