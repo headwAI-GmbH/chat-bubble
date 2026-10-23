@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.0.0] - 2026-10-22
+
+### Added
+
+- Compatibility matrix in the README listing the HeadwAI ONE and Open WebUI versions each chat bubble version was tested against. Automated end-to-end tests run against the last three releases of HeadwAI ONE and Open WebUI.
+
+### Changed
+
+- **Breaking:** The chat completions request no longer sends `chat_id`, `id`, `parent_id` or `user_message`, so the backend answers with server-sent events. The chat history is still stored by the chat bubble. Older backends that need these fields no longer work, see the compatibility matrix.
+
+### Fixed
+
+- Chat completions with HeadwAI ONE / Open WebUI 0.12 failing with `No valid stream events were sent` or `409 Message already exists or has an invalid ID.`
+
 ## [8.4.0] - 2026-07-06
 
 ### Added
