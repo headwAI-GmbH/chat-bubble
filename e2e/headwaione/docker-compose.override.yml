@@ -1,7 +1,8 @@
 services:
   # HeadwAI ONE Backend Configuration
   backend:
-    image: registry.gitlab.headwai.org/headwai/headwai-open-webui:main
+    # Override with BACKEND_IMAGE to test a specific version, e.g. registry.gitlab.headwai.org/headwai/headwai-open-webui:upgrade-to-0.12.3
+    image: ${BACKEND_IMAGE:-registry.gitlab.headwai.org/headwai/headwai-open-webui:main}
     platform: linux/amd64
     container_name: headwaione-backend-e2e
     environment:
