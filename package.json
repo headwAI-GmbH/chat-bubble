@@ -32,7 +32,9 @@
     "build:widget": "vite build",
     "copy:assets": "cp -r icons dist-widget/",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run compatibility:check && npm run build",
+    "compatibility:table": "node scripts/update-compatibility-table.js",
+    "compatibility:check": "node scripts/update-compatibility-table.js --check"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
