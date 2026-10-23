@@ -252,7 +252,11 @@
       //   tags_generation: true,
       //   follow_up_generation: false,
       // },
-      ...($chatId && { chat_id: $chatId }), // Include chat_id only if we have one
+      // chat_id, id, parent_id and user_message are deliberately not sent. Backend >= 0.12
+      // routes requests with chat_id + message id through its WebSocket event emitter (the HTTP
+      // call returns null) and rejects them without an id (409). Without these fields the
+      // request is a legacy call without chat management and streams plain SSE. The bubble
+      // persists the chat itself.
       features: {
         image_generation: false,
         code_interpreter: false,
@@ -639,34 +643,6 @@
       if (currentUserContent) {
         currentUserMessageContent.set(currentUserContent);
       }
-
-      // Find the last assistant message in history — its ID is the parentId of the current user message
-      const lastAssistantMessage =
-        $messageHistory.length > 0
-          ? [...$messageHistory]
-              .reverse()
-              .find((msg) => msg.role === HEADWAI_ASSISTANT_ROLE)
-          : null;
-      const parentAssistantId = lastAssistantMessage
-        ? lastAssistantMessage.id
-        : null;
-
-      details.body.chat_id = $chatId;
-      // Do NOT send 'id' (assistant message ID) — when chat_id + message_id are both present
-      // the backend routes the response through WebSocket event emission instead of HTTP streaming,
-      // resulting in a null HTTP response. Without message_id, the backend returns SSE directly.
-      // parent_id = parentId of the current user message (i.e. the previous assistant message ID)
-      details.body.parent_id = parentAssistantId;
-
-      // user_message = the current user message object (what the backend stores as the user's turn)
-      details.body.user_message = {
-        id: userMessageId,
-        parentId: parentAssistantId,
-        childrenIds: [assistantMessageId],
-        role: USER_ROLE,
-        content: currentUserContent || '',
-        timestamp: Math.floor(Date.now() / 1000),
-      };
     }
     return details;
   };
