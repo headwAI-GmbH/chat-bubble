@@ -176,3 +176,41 @@ test('Closing chat bubble keeps conversation', async ({ page }) => {
   - paragraph: Another question
   `);
 });
+
+test('Conversation is stored in the backend', async ({ page }) => {
+  const question = 'Please store this conversation';
+
+  // The bubble persists the chat itself via POST /api/v1/chats/{chatId}; wait for the
+  // store call that contains the finished assistant answer.
+  const storedChatResponse = page.waitForResponse(async (resp) => {
+    const { pathname } = new URL(resp.url());
+    if (
+      resp.request().method() !== 'POST' ||
+      !/^\/api\/v1\/chats\/[^/]+$/.test(pathname) ||
+      pathname.endsWith('/new')
+    ) {
+      return false;
+    }
+    const body = resp.request().postDataJSON();
+    return Object.values(body?.chat?.history?.messages ?? {}).some(
+      (msg: any) => msg.role === 'assistant' && msg.content === question,
+    );
+  });
+
+  await openAndSendMessage(page, question);
+  await waitForResponse(page);
+
+  const response = await storedChatResponse;
+  expect(response.status()).toBe(200);
+
+  const messages = Object.values((await response.json()).chat.history.messages) as any[];
+  const userMessage = messages.find(
+    (msg) => msg.role === 'user' && msg.content === question,
+  );
+  const assistantMessage = messages.find(
+    (msg) => msg.role === 'assistant' && msg.content === question,
+  );
+  expect(userMessage).toBeTruthy();
+  expect(assistantMessage).toBeTruthy();
+  expect(assistantMessage.parentId).toBe(userMessage.id);
+});
