@@ -101,9 +101,9 @@ Each backend has a `docker-compose.override.yml` that swaps the backend image an
 
 ## CI
 
-Tests run automatically in GitHub Actions on pushes/PRs to `main`/`develop` that touch `src/`, `e2e/`, `package.json`, or `vite.config.js`. See `.github/workflows/widget-e2e-tests.yml`.
+Tests run in GitHub Actions on pull requests to `main` that touch `src/`, `e2e/`, `package.json` or `vite.config.js`, against the last three releases of each backend. The check fails if the newest HeadwAI ONE or Open WebUI release fails. See `.github/workflows/compatibility.yml`.
 
-Both backends are tested in parallel jobs. You can also trigger manually and select a specific backend via `workflow_dispatch`.
+Every backend release runs in its own job. Manual runs (`workflow_dispatch`) test a published version and open a pull request that updates the compatibility matrix.
 
 ## Troubleshooting
 

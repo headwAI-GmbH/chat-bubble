@@ -168,6 +168,8 @@ Backend versions the HeadwAI Chat Bubble was tested against.
 
 The table is generated from [`compatibility.json`](compatibility.json) on the `main` branch, which the [configurator](https://chat-bubble.headwai.org/) also reads. Adding a tested backend version doesn't require a new chat bubble release: edit `compatibility.json`, run `npm run compatibility:table` and merge to `main`.
 
+The [Compatibility Matrix workflow](.github/workflows/compatibility.yml) tests the chat bubble against the last three releases of HeadwAI ONE and Open WebUI. On pull requests it tests the source and reports the results in the run summary. After each release (or when started manually) it tests the published version and opens a pull request that adds the passing combinations.
+
 ## Configuration
 
 The HeadwAI Chat Bubble can be configured using either the global `window.HEADWAI_CHAT_BUBBLE_CONFIG` object or data attributes on individual HeadwAI Chat Bubble elements. Below are all available configuration options:
