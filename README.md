@@ -148,6 +148,28 @@ For multiple instances use data attributes of the `<div>` tag for configuration 
 <script src="https://cdn.jsdelivr.net/npm/@headwai/chat-bubble@latest/dist-widget/chat-bubble.js"></script>
 ```
 
+## Compatibility
+
+Backend versions the HeadwAI Chat Bubble was tested against.
+
+<!-- compatibility:start -->
+| Chat Bubble | HeadwAI ONE | Open WebUI |
+| --- | --- | --- |
+| 9.0.0 | – | v0.12.3 |
+| 8.4.0 | v0.9.1-6, v0.11.4-2 | – |
+| 8.3.5 | v0.9.1-6 | – |
+| 8.3.4 | v0.9.1-2, v0.9.1-3, v0.9.1-6 | v0.9.1, v0.9.2, v0.9.6 |
+| 8.3.3 | v0.9.1-2, v0.9.1-3 | v0.9.1, v0.9.2 |
+| 8.3.2 | v0.9.1-2, v0.9.1-3 | v0.9.1, v0.9.2 |
+| 8.3.0 | v0.7.2 | v0.7.2 |
+| 8.2.0 | v0.7.2 | v0.7.2 |
+| 8.1.0 | v0.7.2 | v0.7.2 |
+<!-- compatibility:end -->
+
+The table is generated from [`compatibility.json`](compatibility.json) on the `main` branch, which the [configurator](https://chat-bubble.headwai.org/) also reads. Adding a tested backend version doesn't require a new chat bubble release: edit `compatibility.json`, run `npm run compatibility:table` and merge to `main`.
+
+The [Compatibility Matrix workflow](.github/workflows/compatibility.yml) tests the chat bubble against the last three releases of HeadwAI ONE and Open WebUI. On pull requests it tests the source and reports the results in the run summary. After each release (or when started manually) it tests the published version and opens a pull request that adds the passing combinations.
+
 ## Configuration
 
 The HeadwAI Chat Bubble can be configured using either the global `window.HEADWAI_CHAT_BUBBLE_CONFIG` object or data attributes on individual HeadwAI Chat Bubble elements. Below are all available configuration options:

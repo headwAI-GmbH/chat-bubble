@@ -46,6 +46,22 @@ npm run test:headwaione     # Test with HeadwAI ONE backend
 npm run test:openwebui      # Test with Open WebUI backend
 ```
 
+### Test Specific Versions
+
+By default the widget is built from the local source and the backends use the `:main` images. Two environment variables select other versions:
+
+| Variable         | Effect                                                                              |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| `BACKEND_IMAGE`  | Backend image to test against                                                       |
+| `WIDGET_VERSION` | Published `@headwai/chat-bubble` version from npm to test instead of the local source |
+
+```bash
+BACKEND_IMAGE=ghcr.io/open-webui/open-webui:v0.12.3 npm run test:openwebui
+WIDGET_VERSION=8.4.0 BACKEND_IMAGE=registry.gitlab.headwai.org/headwai/headwai-open-webui:0.11.4-2 npm run test:headwaione
+```
+
+The tested widget version is logged by the `chat-bubble-dev` container (`Serving chat bubble widget …`). Each run starts with an empty backend volume, so switching backend versions works without manual cleanup. Docker uses a locally cached image for a tag, so `docker pull` floating tags like `:main` before testing them.
+
 ### Interactive / Debug Modes
 
 ```bash
@@ -85,9 +101,9 @@ Each backend has a `docker-compose.override.yml` that swaps the backend image an
 
 ## CI
 
-Tests run automatically in GitHub Actions on pushes/PRs to `main`/`develop` that touch `src/`, `e2e/`, `package.json`, or `vite.config.js`. See `.github/workflows/widget-e2e-tests.yml`.
+Tests run in GitHub Actions on pull requests to `main` that touch `src/`, `e2e/`, `package.json` or `vite.config.js`, against the last three releases of each backend. The check fails if the newest HeadwAI ONE or Open WebUI release fails. See `.github/workflows/compatibility.yml`.
 
-Both backends are tested in parallel jobs. You can also trigger manually and select a specific backend via `workflow_dispatch`.
+Every backend release runs in its own job. Manual runs (`workflow_dispatch`) test a published version and open a pull request that updates the compatibility matrix.
 
 ## Troubleshooting
 

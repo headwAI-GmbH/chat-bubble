@@ -5,6 +5,8 @@
 
 set -euo pipefail
 
+trap 'echo "ERROR: prepare-db-for-test.sh failed at line $LINENO: $BASH_COMMAND" >&2' ERR
+
 # Install dependencies if any are missing (Debian-based container)
 if ! command -v sqlite3 &>/dev/null || ! command -v jq &>/dev/null || ! command -v curl &>/dev/null || ! command -v mkpasswd &>/dev/null; then
   apt-get update -qq && apt-get install -yqq sqlite3 jq curl whois
@@ -42,15 +44,40 @@ PASSWORD_HASH=$(mkpasswd -m bcrypt "$PASSWORD")
 echo "Preparing DB: $DB_FILE"
 
 # Prepare database for testing
+#
+# Every INSERT names its columns (like the release assurance framework's
+# 06-db-add-default-users.sh) so new nullable columns added by a backend
+# upgrade don't break the seed. Each step runs in its own transaction with
+# -bail; on failure the step name, the sqlite error, the backend version, the
+# schema revision and the current schema of the affected tables are printed.
 
-sqlite3 "$DB_FILE" <<EOF
--- After some empty database was prepared in the right way, the following command was used to get the dump and then the important commands were extracted and put into this script
--- sqlite3 webui.db .dump > webui.sql
+SCHEMA_REVISION=$(sqlite3 "$DB_FILE" 'SELECT version_num FROM alembic_version;' 2>/dev/null || echo "unknown")
+echo "Backend version: $VERSION, schema revision: $SCHEMA_REVISION"
 
--- Note: OpenAI provider settings are intentionally configured via backend API
--- below to ensure runtime state is updated (not only DB state).
+# Usage: run_sql "<step name>" <table>... <<SQL ... SQL
+run_sql() {
+  local step="$1"
+  shift
+  local sql output
+  sql=$(cat)
 
--- Truncate some tables
+  if ! output=$(printf 'BEGIN;\n%s\nCOMMIT;\n' "$sql" | sqlite3 -bail "$DB_FILE" 2>&1); then
+    echo "ERROR: step '$step' failed (backend version $VERSION, schema revision $SCHEMA_REVISION)" >&2
+    echo "$output" >&2
+    for table in "$@"; do
+      echo "--- current schema of table '$table':" >&2
+      sqlite3 "$DB_FILE" ".schema \"$table\"" >&2 || true
+    done
+    exit 1
+  fi
+  echo "  OK: $step"
+}
+
+# Don't delete KNOWLEDGE and FILE here as they will be cleaned via rest to also
+# clean the actual vectorDB (else we would get duplicate errors on re-runs).
+# OpenAI provider settings are intentionally configured via backend API below
+# to ensure runtime state is updated (not only DB state).
+run_sql "truncate tables" auth user model group prompt access_grant config api_key <<SQL
 DELETE FROM auth;
 DELETE FROM user;
 DELETE FROM model;
@@ -59,38 +86,43 @@ DELETE FROM prompt;
 DELETE FROM access_grant;
 DELETE FROM config;
 DELETE FROM api_key;
--- Don't delete KNOWLEDGE and FILE here as they will be cleaned via rest to also clean the actual vectorDB (else we would get duplicate errors on re-runs)
+SQL
 
--- Insert test users with explicit column names to ensure correct mapping
-INSERT INTO user (id, email, username, role, name, profile_image_url, profile_banner_image_url, bio, gender, date_of_birth, timezone, presence_state, status_emoji, status_message, status_expires_at, info, settings, oauth, scim, last_active_at, updated_at, created_at) 
+run_sql "insert test users" user <<SQL
+INSERT INTO user (id, email, username, role, name, profile_image_url, profile_banner_image_url, bio, gender, date_of_birth, timezone, presence_state, status_emoji, status_message, status_expires_at, info, settings, oauth, scim, last_active_at, updated_at, created_at)
 VALUES('7a9b8155-82f6-41db-920c-d1aceb024c30','test.admin@headwai.org',NULL,'admin','Test Admin','/user.png',NULL,NULL,NULL,NULL,'Europe/Vienna',NULL,NULL,NULL,NULL,'{"ui": {"version": "$VERSION"}}',NULL,NULL,NULL,1771323474,1771323474,1771323916);
-INSERT INTO user (id, email, username, role, name, profile_image_url, profile_banner_image_url, bio, gender, date_of_birth, timezone, presence_state, status_emoji, status_message, status_expires_at, info, settings, oauth, scim, last_active_at, updated_at, created_at) 
+INSERT INTO user (id, email, username, role, name, profile_image_url, profile_banner_image_url, bio, gender, date_of_birth, timezone, presence_state, status_emoji, status_message, status_expires_at, info, settings, oauth, scim, last_active_at, updated_at, created_at)
 VALUES('8c890910-86da-4322-9cd8-19afea0b596f','test.user@headwai.org',NULL,'user','Test User','/user.png',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'{"ui": {"version": "$VERSION"}}',NULL,NULL,NULL,1771323906,1771323906,1771323906);
+SQL
 
--- Insert auth records
-INSERT INTO auth VALUES('7a9b8155-82f6-41db-920c-d1aceb024c30','test.admin@headwai.org','$PASSWORD_HASH',1);
-INSERT INTO auth VALUES('8c890910-86da-4322-9cd8-19afea0b596f','test.user@headwai.org','$PASSWORD_HASH',1);
+run_sql "insert auth records" auth <<SQL
+INSERT INTO auth (id, email, password, active) VALUES('7a9b8155-82f6-41db-920c-d1aceb024c30','test.admin@headwai.org','$PASSWORD_HASH',1);
+INSERT INTO auth (id, email, password, active) VALUES('8c890910-86da-4322-9cd8-19afea0b596f','test.user@headwai.org','$PASSWORD_HASH',1);
+SQL
 
--- Create models public
-INSERT INTO model VALUES('gpt-4o','17a9b8155-82f6-41db-920c-d1aceb024c30',NULL,'gpt-4o','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": null}','{}',1771842399,1771842399,1);
-INSERT INTO model VALUES('gpt-4o-mini','7a9b8155-82f6-41db-920c-d1aceb024c30',NULL,'gpt-4o-mini','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": null}','{}',1771842399,1771842399,1);
-INSERT INTO model VALUES('gpt-3.5-turbo','7a9b8155-82f6-41db-920c-d1aceb024c30',NULL,'gpt-3.5-turbo','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": null}','{}',1771842399,1771842399,1);
+run_sql "insert public models" model <<SQL
+INSERT INTO model (id, user_id, base_model_id, name, meta, params, created_at, updated_at, is_active) VALUES('gpt-4o','17a9b8155-82f6-41db-920c-d1aceb024c30',NULL,'gpt-4o','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": null}','{}',1771842399,1771842399,1);
+INSERT INTO model (id, user_id, base_model_id, name, meta, params, created_at, updated_at, is_active) VALUES('gpt-4o-mini','7a9b8155-82f6-41db-920c-d1aceb024c30',NULL,'gpt-4o-mini','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": null}','{}',1771842399,1771842399,1);
+INSERT INTO model (id, user_id, base_model_id, name, meta, params, created_at, updated_at, is_active) VALUES('gpt-3.5-turbo','7a9b8155-82f6-41db-920c-d1aceb024c30',NULL,'gpt-3.5-turbo','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": null}','{}',1771842399,1771842399,1);
+SQL
 
--- Make models all public
-INSERT INTO access_grant VALUES('4c65309b-15e2-4d47-b3d3-8043a8587a23','model','gpt-3.5-turbo','user','*','read',1771842399);
-INSERT INTO access_grant VALUES('11111111-15e2-4d47-b3d3-8043a8587a21','model','gpt-4o','user','*','read',1771842399);
-INSERT INTO access_grant VALUES('22222222-15e2-4d47-b3d3-8043a8587a22','model','gpt-4o-mini','user','*','read',1771842399);
+run_sql "make models public" access_grant <<SQL
+INSERT INTO access_grant (id, resource_type, resource_id, principal_type, principal_id, permission, created_at) VALUES('4c65309b-15e2-4d47-b3d3-8043a8587a23','model','gpt-3.5-turbo','user','*','read',1771842399);
+INSERT INTO access_grant (id, resource_type, resource_id, principal_type, principal_id, permission, created_at) VALUES('11111111-15e2-4d47-b3d3-8043a8587a21','model','gpt-4o','user','*','read',1771842399);
+INSERT INTO access_grant (id, resource_type, resource_id, principal_type, principal_id, permission, created_at) VALUES('22222222-15e2-4d47-b3d3-8043a8587a22','model','gpt-4o-mini','user','*','read',1771842399);
+SQL
 
---- Create published model for Chat Bubble
-INSERT INTO model VALUES('test-admin-assistant','7a9b8155-82f6-41db-920c-d1aceb024c30','gpt-4o','Test Admin Assistant','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": {"file_context": true, "vision": true, "file_upload": true, "web_search": true, "image_generation": true, "code_interpreter": true, "citations": true, "status_updates": true, "builtin_tools": true, "publication": {"enabled": true, "domain_whitelist": "localhost:5174", "user_name": "Test Admin", "user_id": "7a9b8155-82f6-41db-920c-d1aceb024c30"}}, "suggestion_prompts": null, "tags": [], "builtinTools": {"time": true, "memory": true, "chats": true, "notes": true, "knowledge": true, "channels": true, "web_search": true, "image_generation": true, "code_interpreter": true}}','{}',1772557393,1772557393,1);
+run_sql "insert published chat bubble model" model <<SQL
+INSERT INTO model (id, user_id, base_model_id, name, meta, params, created_at, updated_at, is_active) VALUES('test-admin-assistant','7a9b8155-82f6-41db-920c-d1aceb024c30','gpt-4o','Test Admin Assistant','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": {"file_context": true, "vision": true, "file_upload": true, "web_search": true, "image_generation": true, "code_interpreter": true, "citations": true, "status_updates": true, "builtin_tools": true, "publication": {"enabled": true, "domain_whitelist": "localhost:5174", "user_name": "Test Admin", "user_id": "7a9b8155-82f6-41db-920c-d1aceb024c30"}}, "suggestion_prompts": null, "tags": [], "builtinTools": {"time": true, "memory": true, "chats": true, "notes": true, "knowledge": true, "channels": true, "web_search": true, "image_generation": true, "code_interpreter": true}}','{}',1772557393,1772557393,1);
+SQL
 
--- Create pvp2 header test group
-INSERT INTO "group" VALUES('794c7a11-e5a1-4a84-a726-0f1db788587d','7a9b8155-82f6-41db-920c-d1aceb024c30','Test PVP2 Header Group','','{}','null','{"workspace": {"models": true, "knowledge": true, "prompts": true, "tools": true, "skills": true, "models_import": true, "models_export": true, "prompts_import": true, "prompts_export": true, "tools_import": true, "tools_export": true}, "sharing": {"models": true, "public_models": true, "knowledge": true, "public_knowledge": true, "prompts": true, "public_prompts": true, "tools": true, "public_tools": true, "skills": true, "public_skills": true, "notes": true, "public_notes": true}, "chat": {"controls": true, "valves": true, "system_prompt": true, "params": true, "file_upload": true, "delete": true, "delete_message": true, "continue_response": true, "regenerate_response": true, "rate_response": true, "edit": true, "share": true, "export": true, "stt": true, "tts": true, "call": true, "multiple_models": true, "temporary": true, "temporary_enforced": false}, "features": {"api_keys": false, "notes": true, "channels": true, "folders": true, "direct_tool_servers": false, "web_search": true, "image_generation": true, "code_interpreter": true, "memories": true}, "settings": {"interface": true}}',1772463585,1772463585);
+run_sql "insert pvp2 header test group" group <<SQL
+INSERT INTO "group" (id, user_id, name, description, data, meta, permissions, created_at, updated_at) VALUES('794c7a11-e5a1-4a84-a726-0f1db788587d','7a9b8155-82f6-41db-920c-d1aceb024c30','Test PVP2 Header Group','','{}','null','{"workspace": {"models": true, "knowledge": true, "prompts": true, "tools": true, "skills": true, "models_import": true, "models_export": true, "prompts_import": true, "prompts_export": true, "tools_import": true, "tools_export": true}, "sharing": {"models": true, "public_models": true, "knowledge": true, "public_knowledge": true, "prompts": true, "public_prompts": true, "tools": true, "public_tools": true, "skills": true, "public_skills": true, "notes": true, "public_notes": true}, "chat": {"controls": true, "valves": true, "system_prompt": true, "params": true, "file_upload": true, "delete": true, "delete_message": true, "continue_response": true, "regenerate_response": true, "rate_response": true, "edit": true, "share": true, "export": true, "stt": true, "tts": true, "call": true, "multiple_models": true, "temporary": true, "temporary_enforced": false}, "features": {"api_keys": false, "notes": true, "channels": true, "folders": true, "direct_tool_servers": false, "web_search": true, "image_generation": true, "code_interpreter": true, "memories": true}, "settings": {"interface": true}}',1772463585,1772463585);
+SQL
 
--- Add api-key for test admin and llmock config
-INSERT INTO api_key VALUES('key_7a9b8155-82f6-41db-920c-d1aceb024c30','7a9b8155-82f6-41db-920c-d1aceb024c30','sk-test-api-key',NULL,NULL,NULL,1772705231,1772705231);
-
-EOF
+run_sql "insert api key for test admin" api_key <<SQL
+INSERT INTO api_key (id, user_id, "key", data, expires_at, last_used_at, created_at, updated_at) VALUES('key_7a9b8155-82f6-41db-920c-d1aceb024c30','7a9b8155-82f6-41db-920c-d1aceb024c30','sk-test-api-key',NULL,NULL,NULL,1772705231,1772705231);
+SQL
 
 # Verify critical tables have expected data
 echo "Verifying database contents..."

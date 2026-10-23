@@ -1,0 +1,273 @@
+name: Compatibility Matrix
+
+# Tests the chat bubble against the last releases of HeadwAI ONE and Open WebUI.
+#
+# - Pull requests: tests the widget built from the pull request's source. The
+#   check fails if the newest HeadwAI ONE or Open WebUI release fails; older
+#   releases are only reported. The results are not added to
+#   compatibility.json, because the source isn't published yet.
+# - Manual runs and releases (started by the publish workflow): tests a
+#   published npm version and opens a pull request that adds the passing
+#   combinations to compatibility.json.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/compatibility.yml'
+      - 'scripts/compatibility-*.js'
+      - 'src/**'
+      - 'e2e/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+  # Also started by the publish workflow after a release
+  workflow_dispatch:
+    inputs:
+      widget_version:
+        description: 'Published widget version to test ("latest" = npm latest)'
+        required: false
+        default: 'latest'
+      count:
+        description: 'Number of releases per backend'
+        required: false
+        default: '3'
+      projects:
+        description: 'Backends to test'
+        required: false
+        default: 'headwaione,openwebui'
+        type: choice
+        options:
+          - headwaione,openwebui
+          - headwaione
+          - openwebui
+      include_tested:
+        description: 'Also test combinations already in compatibility.json'
+        required: false
+        default: false
+        type: boolean
+      create_pr:
+        description: 'Open a pull request with the results'
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: compatibility-matrix
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve versions
+    runs-on: ubuntu-latest
+    outputs:
+      widget_version: ${{ steps.candidates.outputs.widget_version }}
+      widget_label: ${{ steps.candidates.outputs.widget_label }}
+      # Empty when testing the source
+      npm_version: ${{ steps.candidates.outputs.npm_version }}
+      source: ${{ steps.candidates.outputs.source }}
+      matrix: ${{ steps.candidates.outputs.matrix }}
+      count: ${{ steps.candidates.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Resolve widget and backend versions
+        id: candidates
+        env:
+          WIDGET_VERSION: ${{ github.event_name == 'pull_request' && 'source' || inputs.widget_version || 'latest' }}
+          COUNT: ${{ inputs.count || '3' }}
+          PROJECTS: ${{ inputs.projects || 'headwaione,openwebui' }}
+          INCLUDE_TESTED: ${{ inputs.include_tested }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLAB_REGISTRY_USER: ${{ secrets.GITLAB_REGISTRY_USER }}
+          GITLAB_REGISTRY_TOKEN: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
+        run: |
+          RESULT=$(node scripts/compatibility-candidates.js)
+          echo "$RESULT" | jq .
+          WIDGET_VERSION=$(jq -r .widgetVersion <<<"$RESULT")
+          SOURCE=$(jq -r .source <<<"$RESULT")
+          {
+            echo "widget_version=$WIDGET_VERSION"
+            echo "source=$SOURCE"
+            if [ "$SOURCE" = "true" ]; then
+              echo "widget_label=$WIDGET_VERSION (source)"
+              echo "npm_version="
+            else
+              echo "widget_label=$WIDGET_VERSION"
+              echo "npm_version=$WIDGET_VERSION"
+            fi
+            echo "matrix=$(jq -c '{include: .include}' <<<"$RESULT")"
+            echo "count=$(jq '.include | length' <<<"$RESULT")"
+          } >> "$GITHUB_OUTPUT"
+
+  test:
+    name: ${{ needs.resolve.outputs.widget_label }} with ${{ matrix.project }} ${{ matrix.version }}
+    needs: resolve
+    if: needs.resolve.outputs.count != '0'
+    runs-on: ubuntu-latest
+    # Failed combinations are reported in the summary instead of failing the run,
+    # except the newest backend releases on pull requests
+    continue-on-error: ${{ !(github.event_name == 'pull_request' && matrix.required) }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.resolve.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install E2E test dependencies
+        working-directory: e2e
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Log in to GitLab Container Registry
+        if: matrix.project == 'headwaione'
+        uses: docker/login-action@v4
+        with:
+          registry: registry.gitlab.headwai.org
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
+
+      - name: Run Playwright tests
+        working-directory: e2e
+        env:
+          CI: true
+          E2E_CONTAINER_NAME: ${{ matrix.project }}-backend-e2e
+          # Empty for pull requests: the widget is built from source
+          WIDGET_VERSION: ${{ needs.resolve.outputs.npm_version }}
+          BACKEND_IMAGE: ${{ matrix.image }}
+        run: npx playwright test --config=playwright.${{ matrix.project }}.config.ts
+
+      - name: Record passed combination
+        run: |
+          mkdir -p results
+          jq -n --arg project "${{ matrix.project }}" --arg version "${{ matrix.version }}" \
+            '{project: $project, version: $version}' > "results/${{ matrix.project }}-${{ matrix.version }}.json"
+
+      - name: Upload passed combination
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ matrix.project }}-${{ matrix.version }}
+          path: results/
+          retention-days: 7
+
+      - name: Docker logs on failure
+        if: failure()
+        working-directory: e2e
+        run: docker compose -f docker-compose.yml -f ${{ matrix.project }}/docker-compose.override.yml logs
+
+      - name: Stop Docker services
+        if: always()
+        working-directory: e2e
+        run: docker compose -f docker-compose.yml -f ${{ matrix.project }}/docker-compose.override.yml down -v
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.project }}-${{ matrix.version }}
+          path: |
+            e2e/${{ matrix.project }}/test-results/
+            e2e/${{ matrix.project }}/playwright-report/
+          retention-days: 7
+
+  update:
+    name: Report and update compatibility matrix
+    needs: [resolve, test]
+    if: always() && needs.resolve.result == 'success' && needs.resolve.outputs.count != '0'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download passed combinations
+        # No artifacts when every combination failed
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: result-*
+          path: results
+          merge-multiple: true
+
+      - name: Add passed combinations to compatibility.json
+        if: needs.resolve.outputs.source != 'true'
+        env:
+          WIDGET_VERSION: ${{ needs.resolve.outputs.widget_version }}
+        run: |
+          node scripts/compatibility-add-results.js "$WIDGET_VERSION" results
+          npm run compatibility:table
+          git diff --stat
+
+      - name: Summarize results
+        env:
+          WIDGET_LABEL: ${{ needs.resolve.outputs.widget_label }}
+          MATRIX: ${{ needs.resolve.outputs.matrix }}
+        run: |
+          PASSED=$(cat results/*.json 2>/dev/null | jq -s -c 'map("\(.project) \(.version)")' || echo '[]')
+          {
+            echo "## Compatibility of chat bubble $WIDGET_LABEL"
+            echo ""
+            echo "| Backend | Version | Required | Result |"
+            echo "| --- | --- | --- | --- |"
+            jq -r --argjson passed "${PASSED:-[]}" '.include[] | "\(.project) \(.version)" as $key |
+              "| \(.project) | \(.version) | \(if .required then "yes" else "" end) | \(if ($passed | any(.[]; . == $key)) then "✅ passed" else "❌ failed" end) |"' <<<"$MATRIX"
+          } > summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open pull request
+        if: needs.resolve.outputs.source != 'true' && inputs.create_pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: compatibility/${{ needs.resolve.outputs.widget_version }}
+          title: 'Compatibility matrix: chat bubble ${{ needs.resolve.outputs.widget_version }}'
+          commit-message: 'compatibility matrix: chat bubble ${{ needs.resolve.outputs.widget_version }}'
+          add-paths: |
+            compatibility.json
+            README.md
+          body-path: summary.md
+          delete-branch: true
+
+  # Stable check name for branch protection; fails when a required combination
+  # (newest backend release on a pull request) failed
+  gate:
+    name: Compatibility with latest backends
+    needs: [resolve, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          RESOLVE_RESULT: ${{ needs.resolve.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+        run: |
+          echo "resolve: $RESOLVE_RESULT, test: $TEST_RESULT"
+          if [ "$RESOLVE_RESULT" != "success" ]; then
+            echo "Resolving the versions to test failed"
+            exit 1
+          fi
+          if [ "$TEST_RESULT" = "failure" ] || [ "$TEST_RESULT" = "cancelled" ]; then
+            echo "The chat bubble fails with the newest HeadwAI ONE or Open WebUI release, see the run summary"
+            exit 1
+          fi
