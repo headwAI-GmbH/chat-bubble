@@ -10,8 +10,20 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the chat bubble widget
-RUN npm run build
+# Build the chat bubble widget from source, or, if WIDGET_VERSION is set, use
+# the published dist-widget of that version from npm instead
+ARG WIDGET_VERSION=
+RUN if [ -n "$WIDGET_VERSION" ]; then \
+      rm -rf dist-widget && \
+      npm pack "@headwai/chat-bubble@$WIDGET_VERSION" && \
+      tar -xzf headwai-chat-bubble-*.tgz && \
+      mv package/dist-widget dist-widget && \
+      node -p "require('./package/package.json').version" > widget-version.txt && \
+      rm -rf package headwai-chat-bubble-*.tgz; \
+    else \
+      npm run build && \
+      node -p "require('./package.json').version + ' (source)'" > widget-version.txt; \
+    fi
 
 # Install a simple HTTP server
 RUN npm install -g http-server

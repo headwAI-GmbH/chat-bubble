@@ -35,4 +35,6 @@ cat > /app/dist-widget/test.html << HTMLEOF
 </html>
 HTMLEOF
 
+echo "Serving chat bubble widget $(cat /app/widget-version.txt)"
+
 exec http-server dist-widget -p 5174 --cors
