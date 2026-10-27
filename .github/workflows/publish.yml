@@ -17,6 +17,7 @@ on:
 # Grant necessary permissions to the GITHUB_TOKEN
 permissions:
   contents: write # Needed to push tags
+  actions: write # Needed to start the compatibility matrix workflow
   pull-requests: read
   id-token: write # Needed for NPM trusted publishing
 
@@ -235,6 +236,12 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start compatibility matrix tests
+        if: steps.publish-strategy.outputs.should_publish == 'true' && steps.publish-strategy.outputs.publish_tag == 'latest'
+        run: gh workflow run compatibility.yml --ref main -f widget_version=${{ steps.package-info.outputs.version }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         run: |

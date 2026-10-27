@@ -1,7 +1,8 @@
 services:
   # Open WebUI Backend Configuration
   backend:
-    image: ghcr.io/open-webui/open-webui:main
+    # Override with BACKEND_IMAGE to test a specific version, e.g. ghcr.io/open-webui/open-webui:v0.12.3
+    image: ${BACKEND_IMAGE:-ghcr.io/open-webui/open-webui:main}
     platform: linux/amd64
     container_name: openwebui-backend-e2e
     volumes:

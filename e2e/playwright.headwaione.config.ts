@@ -23,7 +23,7 @@ export default defineConfig({
 
   webServer: {
     command:
-      'docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml down && docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build',
+      'docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml down -v && docker compose -f docker-compose.yml -f headwaione/docker-compose.override.yml up --build',
     cwd: __dirname,
     url: 'http://localhost:5174',
     reuseExistingServer: false,
