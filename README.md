@@ -155,7 +155,7 @@ Backend versions the HeadwAI Chat Bubble was tested against.
 <!-- compatibility:start -->
 | Chat Bubble | HeadwAI ONE | Open WebUI |
 | --- | --- | --- |
-| 9.0.0 | – | v0.12.3 |
+| 9.0.0 | v0.11.3-1, v0.11.4-2, v0.12.3-1 | v0.12.2, v0.12.3, v0.12.4 |
 | 8.4.0 | v0.9.1-6, v0.11.4-2 | – |
 | 8.3.5 | v0.9.1-6 | – |
 | 8.3.4 | v0.9.1-2, v0.9.1-3, v0.9.1-6 | v0.9.1, v0.9.2, v0.9.6 |
