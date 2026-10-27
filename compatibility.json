@@ -25,6 +25,7 @@
     "widgetVersion": "8.4.0",
     "headwAIONEVersions": [
       "v0.9.1-6",
+      "v0.11.3-1",
       "v0.11.4-2"
     ],
     "supportedFeatures": [
