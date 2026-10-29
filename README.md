@@ -150,20 +150,20 @@ For multiple instances use data attributes of the `<div>` tag for configuration 
 
 ## Compatibility
 
-Open WebUI versions the HeadwAI Chat Bubble was tested against.
+Backend versions the HeadwAI Chat Bubble was tested against. HeadwAI ONE is no longer supported since chat bubble 10.0.0; its column lists the versions older chat bubble versions were tested against.
 
 <!-- compatibility:start -->
-| Chat Bubble | Open WebUI |
-| --- | --- |
-| 9.0.0 | v0.12.2, v0.12.3, v0.12.4 |
-| 8.4.0 | – |
-| 8.3.5 | – |
-| 8.3.4 | v0.9.1, v0.9.2, v0.9.6 |
-| 8.3.3 | v0.9.1, v0.9.2 |
-| 8.3.2 | v0.9.1, v0.9.2 |
-| 8.3.0 | v0.7.2 |
-| 8.2.0 | v0.7.2 |
-| 8.1.0 | v0.7.2 |
+| Chat Bubble | HeadwAI ONE | Open WebUI |
+| --- | --- | --- |
+| 9.0.0 | v0.11.3-1, v0.11.4-2, v0.12.3-1 | v0.12.2, v0.12.3, v0.12.4 |
+| 8.4.0 | v0.9.1-6, v0.11.3-1, v0.11.4-2 | – |
+| 8.3.5 | v0.9.1-6 | – |
+| 8.3.4 | v0.9.1-2, v0.9.1-3, v0.9.1-6 | v0.9.1, v0.9.2, v0.9.6 |
+| 8.3.3 | v0.9.1-2, v0.9.1-3 | v0.9.1, v0.9.2 |
+| 8.3.2 | v0.9.1-2, v0.9.1-3 | v0.9.1, v0.9.2 |
+| 8.3.0 | v0.7.2 | v0.7.2 |
+| 8.2.0 | v0.7.2 | v0.7.2 |
+| 8.1.0 | v0.7.2 | v0.7.2 |
 <!-- compatibility:end -->
 
 The table is generated from [`compatibility.json`](compatibility.json) on the `main` branch, which the [configurator](https://chat-bubble.headwai.org/) also reads. Adding a tested Open WebUI version doesn't require a new chat bubble release: edit `compatibility.json`, run `npm run compatibility:table` and merge to `main`.

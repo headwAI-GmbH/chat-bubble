@@ -18,11 +18,11 @@ const entries = readCompatibility().sort(
 );
 
 const table = [
-  '| Chat Bubble | Open WebUI |',
-  '| --- | --- |',
+  '| Chat Bubble | HeadwAI ONE | Open WebUI |',
+  '| --- | --- | --- |',
   ...entries.map(
     (entry) =>
-      `| ${entry.widgetVersion} | ${formatVersions(entry.openWebUIVersions)} |`,
+      `| ${entry.widgetVersion} | ${formatVersions(entry.headwAIONEVersions)} | ${formatVersions(entry.openWebUIVersions)} |`,
   ),
 ].join('\n');
 
