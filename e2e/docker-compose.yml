@@ -1,5 +1,5 @@
 services:
-  # Mock LLM Service (shared by both backends)
+  # Mock LLM Service
   mock-llm:
     image: ghcr.io/modai-systems/llmock:latest
     platform: linux/amd64
@@ -16,9 +16,9 @@ services:
       retries: 12
       start_period: 15s
 
-  # Backend service (to be overridden by specific backend configs)
+  # Open WebUI backend (image and container name set in openwebui/docker-compose.override.yml)
   backend:
-    image: ghcr.io/open-webui/open-webui:main # Default image, will be overridden
+    image: ghcr.io/open-webui/open-webui:main
     platform: linux/amd64
     container_name: backend-e2e
     ports:

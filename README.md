@@ -5,8 +5,8 @@
 ## Features
 
 - 🚀 Easy integration into any Website
-- 💬 Connect to any [HeadwAI ONE](https://www.headwai.org/headwai-one) Assistant or [Open WebUI](https://openwebui.com) Model
-- 📋 Review conversations in [HeadwAI ONE](https://www.headwai.org/headwai-one) or [Open WebUI](https://openwebui.com) instance
+- 💬 Connect to any [Open WebUI](https://openwebui.com) Model
+- 📋 Review conversations in your [Open WebUI](https://openwebui.com) instance
 - 👍 Give Feedback on messages
 - 📥 Download Conversations in HeadwAI Chat Bubble
 - ✅ Terms of Use Check
@@ -29,7 +29,7 @@ Add the HeadwAI Chat Bubble to the respective .html file.
     <script>
       // Runtime configuration override
       window.HEADWAI_CHAT_BUBBLE_CONFIG = {
-        apiUrl: 'https://company.headwai-one.at',
+        apiUrl: 'https://company.open-webui.org',
         apiKey: 'your-api-key-here',
         assistantId: 'customer-support-assistant-id',
         maxMessages: 0,
@@ -99,7 +99,7 @@ For multiple instances use data attributes of the `<div>` tag for configuration 
 <!-- HeadwAI Chat Bubble with specific configuration -->
 <div
   data-chat-bubble
-  data-chat-bubble-api-url="https://company.headwai-one.at"
+  data-chat-bubble-api-url="https://company.open-webui.org"
   data-chat-bubble-api-key="your-api-key-here"
   data-chat-bubble-assistant-id="customer-support-assistant-id"
   data-chat-bubble-max-messages="0"
@@ -124,7 +124,7 @@ For multiple instances use data attributes of the `<div>` tag for configuration 
 <!-- Another HeadwAI Chat Bubble with different config -->
 <div
   data-chat-bubble
-  data-chat-bubble-api-url="https://company.headwai-one.at"
+  data-chat-bubble-api-url="https://company.open-webui.org"
   data-chat-bubble-api-key="your-api-key-here"
   data-chat-bubble-assistant-id="faq-assistant-id"
   data-chat-bubble-max-messages="10"
@@ -150,7 +150,7 @@ For multiple instances use data attributes of the `<div>` tag for configuration 
 
 ## Compatibility
 
-Backend versions the HeadwAI Chat Bubble was tested against.
+Backend versions the HeadwAI Chat Bubble was tested against. HeadwAI ONE is no longer supported since chat bubble 10.0.0; its column lists the versions older chat bubble versions were tested against.
 
 <!-- compatibility:start -->
 | Chat Bubble | HeadwAI ONE | Open WebUI |
@@ -166,9 +166,9 @@ Backend versions the HeadwAI Chat Bubble was tested against.
 | 8.1.0 | v0.7.2 | v0.7.2 |
 <!-- compatibility:end -->
 
-The table is generated from [`compatibility.json`](compatibility.json) on the `main` branch, which the [configurator](https://chat-bubble.headwai.org/) also reads. Adding a tested backend version doesn't require a new chat bubble release: edit `compatibility.json`, run `npm run compatibility:table` and merge to `main`.
+The table is generated from [`compatibility.json`](compatibility.json) on the `main` branch, which the [configurator](https://chat-bubble.headwai.org/) also reads. Adding a tested Open WebUI version doesn't require a new chat bubble release: edit `compatibility.json`, run `npm run compatibility:table` and merge to `main`.
 
-The [Compatibility Matrix workflow](.github/workflows/compatibility.yml) tests the chat bubble against the last three releases of HeadwAI ONE and Open WebUI. On pull requests it tests the source and reports the results in the run summary. After each release (or when started manually) it tests the published version and opens a pull request that adds the passing combinations.
+The [Compatibility Matrix workflow](.github/workflows/compatibility.yml) tests the chat bubble against the last three releases of Open WebUI. On pull requests it tests the source and reports the results in the run summary. After each release (or when started manually) it tests the published version and opens a pull request that adds the passing combinations.
 
 ## Configuration
 
@@ -179,42 +179,47 @@ The HeadwAI Chat Bubble can be configured using either the global `window.HEADWA
 #### `apiUrl`
 
 **Type:** `string` | **Required:** ✅ | **Default:** `'https://localhost'`
-The base URL of your HeadwAI ONE or Open WebUI API endpoint where the HeadwAI Chat Bubble will send messages. This is the same URL you access your HeadwAI ONE or Open WebUI instance in the web browser.
+The base URL of your Open WebUI API endpoint where the HeadwAI Chat Bubble will send messages. This is the same URL you access your Open WebUI instance in the web browser.
 
 ```javascript
-apiUrl: 'https://company.headwai-one.at';
+apiUrl: 'https://company.open-webui.org';
 ```
 
 #### `apiKey`
 
-**Type:** `string` | **Required:** ⚠️ (Conditional) | **Default:**
-API key for authentication with the API. This is **required** when using the HeadwAI Chat Bubble with a plain [Open WebUI](https://github.com/open-webui/open-webui) instance. When used with a HeadwAI ONE instance an API key is not needed.
+**Type:** `string` | **Required:** ✅
+API key of the [Open WebUI](https://openwebui.com) user the HeadwAI Chat Bubble authenticates as. API keys must be enabled in the Open WebUI admin settings.
 
 ```javascript
 apiKey: 'your-api-key-here';
 ```
 
-**When to use:**
+1. **Open Settings**: Login to [Open WebUI](https://openwebui.com) with the dedicated HeadwAI Chat Bubble user, open the user menu and click on `Settings`.
 
-- ✅ **Required** for [Open WebUI](https://openwebui.com) instances
-- ⚠️ **Not Required** for [HeadwAI ONE](https://www.headwai.org/headwai-one) instances.
+  <img src="docs/images/settings.png" alt="Open WebUI user menu" width="30%" />
+
+1. **Copy API Key**: Select `Account`, show the `API keys` and copy the `API Key` (create one first if there is none).
+
+  <img src="docs/images/api-keys.png" alt="Open WebUI API keys" width="50%" />
+
+> **Note:** The API key is visible in the page source of your website. Use a dedicated user that only has access to the model used by the HeadwAI Chat Bubble.
 
 #### `assistantId`
 
 **Type:** `string` | **Required:** ✅  
-The identifier of the AI assistant to use for generating responses. This should match an assistant configured in your [HeadwAI ONE](https://www.headwai.org/headwai-one) or a model configured in your [Open WebUI](https://openwebui.com) instance.
+The identifier of the model to use for generating responses. This should match a model configured in your [Open WebUI](https://openwebui.com) instance.
 
 ```javascript
 assistantId: 'customer-support-assistant-id';
 ```
 
-1. **Navigate to Assistant or Model**: Login to [HeadwAI ONE](https://www.headwai.org/headwai-one) or [Open WebUI](https://openwebui.com) with the dedicated HeadwAI Chat Bubble user (Or any other user that is allowed to see the desired assistant/model) and click on the `Workspace` menu, then select `Assistants` or `Models`. Search for the name of the desired assistant/model (Or create one). Click onto the edit-`Pen`.
+1. **Navigate to Model**: Login to [Open WebUI](https://openwebui.com) with the dedicated HeadwAI Chat Bubble user (Or any other user that is allowed to see the desired model) and click on the `Workspace` menu, then select `Models`. Search for the name of the desired model (Or create one). Click onto the edit-`Pen`.
 
-  <img src="docs/images/model-edit.png" alt="HeadwAI ONE User Menu" width="50%" />
+  <img src="docs/images/model-edit.png" alt="Open WebUI model edit" width="50%" />
 
-1. **Copy Assistant Id or Model Id**: Now the assistant/model is displayed with its `name` and right underneath the `assistant-id`/`model-id`. Copy the `assistant-id`/`model-id`.
+1. **Copy Model Id**: Now the model is displayed with its `name` and right underneath the `model-id`. Copy the `model-id`.
 
-  <img src="docs/images/model-id.png" alt="HeadwAI ONE User Menu" width="50%" />
+  <img src="docs/images/model-id.png" alt="Open WebUI model id" width="50%" />
 
 ### Optional Configuration
 

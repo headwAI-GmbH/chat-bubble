@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository contains the **HeadwAI Chat Bubble** - a customizable AI chat widget for embedding in websites. Built with **Svelte** and **Vite**, it wraps the `deep-chat` component to provide an easy-to-integrate chat interface that connects to HeadwAI ONE or Open WebUI endpoints. The widget is published to npm as `@headwai/chat-bubble` and distributed via jsDelivr CDN.
+This repository contains the **HeadwAI Chat Bubble** - a customizable AI chat widget for embedding in websites. Built with **Svelte** and **Vite**, it wraps the `deep-chat` component to provide an easy-to-integrate chat interface that connects to Open WebUI endpoints. The widget is published to npm as `@headwai/chat-bubble` and distributed via jsDelivr CDN.
 
 **Type**: JavaScript/Svelte library (widget/embeddable component)  
 **Runtime**: Browser-based, Node.js 18+ for development  
@@ -202,7 +202,7 @@ This updates `package.json`, `package-lock.json`, creates commit & git tag.
 
 ### API Integration
 
-Widget makes requests to 4 HeadwAI ONE or Open WebUI API endpoints:
+Widget makes requests to these Open WebUI API endpoints:
 
 1. **Chat Creation** - `POST {apiUrl}/api/v1/chats/new`
 2. **Chat Completions** - WebSocket `{apiUrl}/api/chat/completions` (streaming)
@@ -212,9 +212,7 @@ Widget makes requests to 4 HeadwAI ONE or Open WebUI API endpoints:
 6. **Tag Generation** - `POST {apiUrl}/api/v1/tasks/tags/completions`
 7. **Title Generation** - `POST {apiUrl}/api/v1/tasks/title/completions`
 
-**HeadwAI ONE**: All requests require `Origin` header matching whitelisted domain in HeadwAI ONE config.
-
-**Open WebUI**: The widget also supports Open WebUI endpoints using the same API structure. For Open WebUI, use an API key for authentication instead of the Origin header requirement. No domain whitelisting is needed.
+All requests authenticate with the Open WebUI API key (`apiKey`) as `Authorization: Bearer` header.
 
 ### Configuration Precedence
 
@@ -239,7 +237,7 @@ Widget makes requests to 4 HeadwAI ONE or Open WebUI API endpoints:
 **Solution**: Create `.env` from `.env.example`, restart dev server
 
 **Issue**: CORS errors in dev  
-**Solution**: HeadwAI ONE API must allow `http://localhost:5174` in published assistant config, or use Open WebUI with API key authentication
+**Solution**: Open WebUI must allow `http://localhost:5174` in `CORS_ALLOW_ORIGIN`
 
 **Issue**: Port 5174 in use  
 **Solution**: Kill process on port or change port in `package.json` dev script

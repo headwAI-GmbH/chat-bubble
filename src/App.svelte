@@ -203,6 +203,11 @@
   ).replace(/\/$/, '');
   const computedApiKey =
     apiKey || import.meta.env.VITE_CHAT_BUBBLE_API_KEY || undefined;
+  if (!computedApiKey) {
+    console.error(
+      'No API key configured. Open WebUI requires an API key, set apiKey or data-chat-bubble-api-key.',
+    );
+  }
 
   const computedUserMessageBackgroundColor =
     userMessageBackgroundColor ||

@@ -48,7 +48,6 @@ export class ChatsAPI {
     historyMessages[initialAssistantMessageId] = initialAssistantMessageObj;
 
     const chatData = {
-      assistantId: assistantId,
       chat: {
         id: '',
         title: 'New Chatbubble Chat',
@@ -100,7 +99,6 @@ export class ChatsAPI {
 
     const chatData = {
       ...(title && { title: title }),
-      assistantId: assistantId,
       chat: {
         files: [],
         models: [assistantId],
@@ -207,18 +205,16 @@ export class ChatsAPI {
   /**
    * Store a single tag for a chat
    * @param {string} chatId - Chat ID
-   * @param {string} assistantId - Assistant ID
    * @param {string} tagName - Tag name to store
    * @returns {Promise<Object|null>} API response object on success, null on failure
    */
-  async storeTag(chatId, assistantId, tagName) {
+  async storeTag(chatId, tagName) {
     if (!chatId) {
       throw new Error('No chat ID available to store tag');
     }
 
     const tagData = {
       name: tagName.trim(),
-      assistantId: assistantId,
     };
 
     return await this.client.post(`/api/v1/chats/${chatId}/tags`, tagData);

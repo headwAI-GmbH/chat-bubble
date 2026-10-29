@@ -15,7 +15,6 @@ docs/
 
 # E2E files (except entrypoint.sh which is needed by the Dockerfile)
 e2e/tests/
-e2e/headwaione/
 e2e/openwebui/
 e2e/node_modules/
 e2e/playwright-report/

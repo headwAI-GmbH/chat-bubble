@@ -3,9 +3,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 export const COMPATIBILITY_FILE = 'compatibility.json';
 
-// e2e project name -> field in compatibility.json
+// e2e project name -> field in compatibility.json. headwAIONEVersions is kept
+// as history of the tested HeadwAI ONE versions, which are no longer tested.
 export const PLATFORM_FIELDS = {
-  headwaione: 'headwAIONEVersions',
   openwebui: 'openWebUIVersions',
 };
 

@@ -1,7 +1,7 @@
 {
   "name": "@headwai/chat-bubble",
-  "version": "9.0.0",
-  "description": "A chat bubble to interact with a HeadwAI ONE or an Open WebUI instance",
+  "version": "10.0.0",
+  "description": "A chat bubble to interact with an Open WebUI instance",
   "type": "module",
   "files": [
     "dist-widget",
