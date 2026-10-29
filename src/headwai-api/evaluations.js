@@ -38,7 +38,6 @@ export class EvaluationsAPI {
     const messageIndex = messageHistory.findIndex((msg) => msg.id === messageId);
 
     const feedbackData = {
-      assistantId: assistantId,
       type: 'rating',
       data: {
         rating: rating,

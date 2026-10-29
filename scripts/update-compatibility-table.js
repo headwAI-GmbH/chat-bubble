@@ -1,6 +1,6 @@
 // Renders compatibility.json as a Markdown table into README.md between the
 // compatibility markers. compatibility.json is maintained by hand: add a
-// backend version only after the e2e tests passed against it.
+// Open WebUI version only after the e2e tests passed against it.
 //
 // Usage: node scripts/update-compatibility-table.js [--check]
 //   --check  exit with 1 if README.md is not up to date instead of writing it
@@ -18,11 +18,11 @@ const entries = readCompatibility().sort(
 );
 
 const table = [
-  '| Chat Bubble | HeadwAI ONE | Open WebUI |',
-  '| --- | --- | --- |',
+  '| Chat Bubble | Open WebUI |',
+  '| --- | --- |',
   ...entries.map(
     (entry) =>
-      `| ${entry.widgetVersion} | ${formatVersions(entry.headwAIONEVersions)} | ${formatVersions(entry.openWebUIVersions)} |`,
+      `| ${entry.widgetVersion} | ${formatVersions(entry.openWebUIVersions)} |`,
   ),
 ].join('\n');
 

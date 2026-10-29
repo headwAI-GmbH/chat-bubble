@@ -5,11 +5,10 @@ export const COMPATIBILITY_FILE = 'compatibility.json';
 
 // e2e project name -> field in compatibility.json
 export const PLATFORM_FIELDS = {
-  headwaione: 'headwAIONEVersions',
   openwebui: 'openWebUIVersions',
 };
 
-// Compares versions like "8.4.0", "v0.12.3" or "0.11.4-2" numerically
+// Compares versions like "8.4.0" or "v0.12.3" numerically
 export const compareVersions = (a, b) => {
   const pa = a.replace(/^v/, '').split(/[.-]/).map(Number);
   const pb = b.replace(/^v/, '').split(/[.-]/).map(Number);
@@ -26,9 +25,8 @@ export const readCompatibility = () =>
 export const writeCompatibility = (entries) => {
   const normalized = [...entries]
     .sort((a, b) => compareVersions(b.widgetVersion, a.widgetVersion))
-    .map(({ widgetVersion, headwAIONEVersions, openWebUIVersions, supportedFeatures }) => ({
+    .map(({ widgetVersion, openWebUIVersions, supportedFeatures }) => ({
       widgetVersion,
-      ...(headwAIONEVersions && { headwAIONEVersions }),
       ...(openWebUIVersions && { openWebUIVersions }),
       supportedFeatures,
     }));

@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 
 const CONTAINER_NAME =
-  process.env.E2E_CONTAINER_NAME || 'headwaione-backend-e2e';
+  process.env.E2E_CONTAINER_NAME || 'openwebui-backend-e2e';
 
 /**
  * Prepare the database for testing before each test.

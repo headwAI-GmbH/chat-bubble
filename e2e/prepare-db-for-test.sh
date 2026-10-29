@@ -112,12 +112,8 @@ INSERT INTO access_grant (id, resource_type, resource_id, principal_type, princi
 INSERT INTO access_grant (id, resource_type, resource_id, principal_type, principal_id, permission, created_at) VALUES('22222222-15e2-4d47-b3d3-8043a8587a22','model','gpt-4o-mini','user','*','read',1771842399);
 SQL
 
-run_sql "insert published chat bubble model" model <<SQL
-INSERT INTO model (id, user_id, base_model_id, name, meta, params, created_at, updated_at, is_active) VALUES('test-admin-assistant','7a9b8155-82f6-41db-920c-d1aceb024c30','gpt-4o','Test Admin Assistant','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": {"file_context": true, "vision": true, "file_upload": true, "web_search": true, "image_generation": true, "code_interpreter": true, "citations": true, "status_updates": true, "builtin_tools": true, "publication": {"enabled": true, "domain_whitelist": "localhost:5174", "user_name": "Test Admin", "user_id": "7a9b8155-82f6-41db-920c-d1aceb024c30"}}, "suggestion_prompts": null, "tags": [], "builtinTools": {"time": true, "memory": true, "chats": true, "notes": true, "knowledge": true, "channels": true, "web_search": true, "image_generation": true, "code_interpreter": true}}','{}',1772557393,1772557393,1);
-SQL
-
-run_sql "insert pvp2 header test group" group <<SQL
-INSERT INTO "group" (id, user_id, name, description, data, meta, permissions, created_at, updated_at) VALUES('794c7a11-e5a1-4a84-a726-0f1db788587d','7a9b8155-82f6-41db-920c-d1aceb024c30','Test PVP2 Header Group','','{}','null','{"workspace": {"models": true, "knowledge": true, "prompts": true, "tools": true, "skills": true, "models_import": true, "models_export": true, "prompts_import": true, "prompts_export": true, "tools_import": true, "tools_export": true}, "sharing": {"models": true, "public_models": true, "knowledge": true, "public_knowledge": true, "prompts": true, "public_prompts": true, "tools": true, "public_tools": true, "skills": true, "public_skills": true, "notes": true, "public_notes": true}, "chat": {"controls": true, "valves": true, "system_prompt": true, "params": true, "file_upload": true, "delete": true, "delete_message": true, "continue_response": true, "regenerate_response": true, "rate_response": true, "edit": true, "share": true, "export": true, "stt": true, "tts": true, "call": true, "multiple_models": true, "temporary": true, "temporary_enforced": false}, "features": {"api_keys": false, "notes": true, "channels": true, "folders": true, "direct_tool_servers": false, "web_search": true, "image_generation": true, "code_interpreter": true, "memories": true}, "settings": {"interface": true}}',1772463585,1772463585);
+run_sql "insert chat bubble model" model <<SQL
+INSERT INTO model (id, user_id, base_model_id, name, meta, params, created_at, updated_at, is_active) VALUES('test-admin-assistant','7a9b8155-82f6-41db-920c-d1aceb024c30','gpt-4o','Test Admin Assistant','{"profile_image_url": "/static/favicon.png", "description": null, "capabilities": {"file_context": true, "vision": true, "file_upload": true, "web_search": true, "image_generation": true, "code_interpreter": true, "citations": true, "status_updates": true, "builtin_tools": true}, "suggestion_prompts": null, "tags": [], "builtinTools": {"time": true, "memory": true, "chats": true, "notes": true, "knowledge": true, "channels": true, "web_search": true, "image_generation": true, "code_interpreter": true}}','{}',1772557393,1772557393,1);
 SQL
 
 run_sql "insert api key for test admin" api_key <<SQL
@@ -146,7 +142,6 @@ verify_count "auth" 2
 verify_count "model" 4
 verify_count "access_grant" 3
 verify_count "api_key" 1
-verify_count '"group"' 1
 
 if [ "$ERRORS" -gt 0 ]; then
   echo "Database verification FAILED with $ERRORS error(s)"

@@ -55,7 +55,8 @@ All configuration attributes listed in the [Configuration section of README.md](
 
 ```bash
 # Production .env file - Core API Configuration
-VITE_CHAT_BUBBLE_API_URL=https://company.headwai-one.at
+VITE_CHAT_BUBBLE_API_URL=https://company.open-webui.org
+VITE_CHAT_BUBBLE_API_KEY=your-api-key-here
 VITE_CHAT_BUBBLE_ASSISTANT_ID=customer-support-assistant-id
 
 # Message Configuration
@@ -78,7 +79,8 @@ VITE_CHAT_BUBBLE_CHAT_TITLE=Customer Support
 <script>
   // Runtime configuration override
   window.HEADWAI_CHAT_BUBBLE_CONFIG = {
-    apiUrl: 'https://company.headwai-one.at',
+    apiUrl: 'https://company.open-webui.org',
+    apiKey: 'your-api-key-here',
     assistantId: 'customer-support-assistant-id',
   };
 </script>
@@ -89,7 +91,8 @@ VITE_CHAT_BUBBLE_CHAT_TITLE=Customer Support
 ```html
 <div
   data-chat-bubble
-  data-chat-bubble-api-url="https://company.headwai-one.at"
+  data-chat-bubble-api-url="https://company.open-webui.org"
+  data-chat-bubble-api-key="your-api-key-here"
   data-chat-bubble-user-message-background-color="#ff9500"
   data-chat-bubble-ai-message-background-color="#00c851"
   data-chat-bubble-user-message-text-color="#ffffff"
@@ -171,9 +174,9 @@ The HeadwAI Chat Bubble makes requests to the following API endpoints:
 - **Method**: POST
 - **Purpose**: Create a new chat session when starting a conversation
 - **Header**:
-  The value of the Origin header must include the a white listed domain in the `Publish Model` configuration.
+  The API key of the Open WebUI user is sent as bearer token.
 
-Origin: http://localhost:5174
+Authorization: Bearer your-api-key-here
 
 ##### Create new chat
 
@@ -183,7 +186,6 @@ For a brand new chat without any initial messages and the a with the title New C
 
 ```javascript
 {
-    "assistantId": "customer-support-assistant-id",
     "chat": {
     },
     "folder_id": null
@@ -214,7 +216,6 @@ For a brand new chat without any initial messages and the a with the title New C
 
 ```javascript
 {
-    "assistantId": "customer-support-assistant-id",
     "chat": {
         "id": "",
         "title": "New Chatbubble Chat", // Choose Title
@@ -333,9 +334,9 @@ For a brand new chat without any initial messages and the a with the title New C
 - **Method**: WebSocket (streaming)
 - **Purpose**: Main chat conversation endpoint for sending messages and receiving AI responses
 - **Header**:
-  The value of the Origin header must include the a white listed domain in the `Publish Assistant` configuration.
+  The API key of the Open WebUI user is sent as bearer token.
 
-Origin: http://localhost:5174
+Authorization: Bearer your-api-key-here
 
 - **Request Format**:
 
@@ -462,15 +463,14 @@ The content is returned in `choices.message.content` as a whole
 - **Method**: POST
 - **Purpose**: Store/update chat history and conversation state
 - **Header**:
-  The value of the Origin header must include the a white listed domain in the `Publish Assistant` configuration.
+  The API key of the Open WebUI user is sent as bearer token.
 
-Origin: http://localhost:5174
+Authorization: Bearer your-api-key-here
 
 - **Request Body**:
 
 ```javascript
 {
-    "assistantId": "customer-support-assistant-id",
     "chat": {
         "models": [
             "customer-support-assistant-id"
@@ -628,7 +628,6 @@ Origin: http://localhost:5174
 
 ```javascript
 {
-    "assistantId": "customer-support-assistant-id",
     "type": "rating",
     "data": {
         "rating": 1, // 1 for postive, -1 for negative
@@ -727,7 +726,6 @@ Origin: http://localhost:5174
 
 ```javascript
 {
-  "assistantId": "customer-support-assistant-id",
   "type": "rating",
   "data": {
     "rating": 1, // 1 for positive, -1 for negative

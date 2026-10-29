@@ -419,7 +419,7 @@
               logger.log('🏷️ Saving tags to backend...');
               // Save all tags concurrently and log results
               const tagPromises = generatedTags.map((tagName) =>
-                headwaiAPI.chats.storeTag(currentChatId, assistantId, tagName),
+                headwaiAPI.chats.storeTag(currentChatId, tagName),
               );
               const results = await Promise.allSettled(tagPromises);
               results.forEach((result, idx) => {

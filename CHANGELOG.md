@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.0.0] - 2026-10-29
+
+### Removed
+
+- **Breaking:** Support for HeadwAI ONE. The chat bubble only works with Open WebUI.
+
+### Changed
+
+- **Breaking:** `apiKey` is required. A missing API key is logged as error in the browser console.
+- Requests no longer send the `assistantId` field that was only used by HeadwAI ONE.
+- The compatibility matrix and its end-to-end tests only cover Open WebUI.
+
 ## [9.0.0] - 2026-10-22
 
 ### Added
