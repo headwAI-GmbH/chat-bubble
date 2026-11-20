@@ -61,6 +61,8 @@ env:
 
 permissions:
   contents: read
+  # Pull the private headwai-open-webui image from ghcr.io
+  packages: read
 
 jobs:
   resolve:
@@ -89,8 +91,6 @@ jobs:
           PROJECTS: ${{ inputs.projects || 'headwaione,openwebui' }}
           INCLUDE_TESTED: ${{ inputs.include_tested }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLAB_REGISTRY_USER: ${{ secrets.GITLAB_REGISTRY_USER }}
-          GITLAB_REGISTRY_TOKEN: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
         run: |
           RESULT=$(node scripts/compatibility-candidates.js)
           echo "$RESULT" | jq .
@@ -136,13 +136,13 @@ jobs:
         working-directory: e2e
         run: npx playwright install --with-deps chromium firefox
 
-      - name: Log in to GitLab Container Registry
+      - name: Log in to GitHub Container Registry
         if: matrix.project == 'headwaione'
         uses: docker/login-action@v4
         with:
-          registry: registry.gitlab.headwai.org
-          username: ${{ secrets.GITLAB_REGISTRY_USER }}
-          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Playwright tests
         working-directory: e2e

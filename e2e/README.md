@@ -57,7 +57,7 @@ By default the widget is built from the local source and the backends use the `:
 
 ```bash
 BACKEND_IMAGE=ghcr.io/open-webui/open-webui:v0.12.3 npm run test:openwebui
-WIDGET_VERSION=8.4.0 BACKEND_IMAGE=registry.gitlab.headwai.org/headwai/headwai-open-webui:0.11.4-2 npm run test:headwaione
+WIDGET_VERSION=8.4.0 BACKEND_IMAGE=ghcr.io/headwai-gmbh/headwai-open-webui:0.11.4-2 npm run test:headwaione
 ```
 
 The tested widget version is logged by the `chat-bubble-dev` container (`Serving chat bubble widget …`). Each run starts with an empty backend volume, so switching backend versions works without manual cleanup. Docker uses a locally cached image for a tag, so `docker pull` floating tags like `:main` before testing them.
